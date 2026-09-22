@@ -1,0 +1,7 @@
+.env
+*.db
+*.sqlite
+database.json.bak
+__pycache__/
+instance/
+migrations/

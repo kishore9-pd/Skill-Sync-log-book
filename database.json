@@ -1,0 +1,156 @@
+{
+  "users": [
+    {
+      "email": "kishore@techwing.com",
+      "name": "Kishore Kumar",
+      "combo": "genai-aws",
+      "password": "password123"
+    },
+    {
+      "email": "penugondakishore2006@gmail.com",
+      "name": "kishore",
+      "combo": "genai-aws",
+      "password": "kishore09@"
+    }
+  ],
+  "logs": [
+    {
+      "id": "log_1789468624",
+      "user_email": "penugondakishore2006@gmail.com",
+      "combo": "genai-aws",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 04 - GenAI Cloud Hub",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Dr. Rajesh Sharma",
+      "topics": "\u2022 Topic 1: GenAI & LLM Foundations\n\u2022 Topic 2: Amazon Bedrock & Titan Embeddings\n\u2022 Topic 3: RAG Architecture & Vector Search",
+      "practical": "\u2022 Step 1: Provisioned Bedrock Knowledge Base connected to S3\n\u2022 Step 2: Ingested PDF documents into OpenSearch Serverless vector index\n\u2022 Step 3: Implemented LangChain ConversationalRetrievalChain in Python",
+      "assignment": "\u2022 Build a RAG Q&A chatbot for company documentation using Amazon Bedrock and LangChain.",
+      "doubts": "\u2022 Discussed dense vector embeddings vs sparse BM25 keyword indexing.\n\u2022 Note: Remember to pause OpenSearch collection to prevent idle costs."
+    },
+    {
+      "id": "log_1789468604_0",
+      "user_email": "kishore@techwing.com",
+      "combo": "genai-aws",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 04 - GenAI Cloud Hub",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Dr. Rajesh Sharma",
+      "topics": "\u2022 Topic 1: GenAI & LLM Foundations\n\u2022 Topic 2: Amazon Bedrock & Titan Embeddings\n\u2022 Topic 3: RAG Architecture & Vector Search",
+      "practical": "\u2022 Step 1: Provisioned Bedrock Knowledge Base connected to S3\n\u2022 Step 2: Ingested PDF documents into OpenSearch Serverless vector index\n\u2022 Step 3: Implemented LangChain ConversationalRetrievalChain in Python",
+      "assignment": "\u2022 Build a RAG Q&A chatbot for company documentation using Amazon Bedrock and LangChain.",
+      "doubts": "\u2022 Discussed dense vector embeddings vs sparse BM25 keyword indexing.\n\u2022 Note: Remember to pause OpenSearch collection to prevent idle costs."
+    },
+    {
+      "id": "log_1789468604_1",
+      "user_email": "kishore@techwing.com",
+      "combo": "fullstack-devops",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 02 - Web & Cloud Infrastructure",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Prof. Vikram Reddy",
+      "topics": "\u2022 Topic 1: React Vite SPA Architecture & Custom Hooks\n\u2022 Topic 2: Docker Multi-Stage Containerization\n\u2022 Topic 3: CI/CD Pipelines with GitHub Actions & AWS ECS",
+      "practical": "\u2022 Step 1: Built modular React UI components with Tailwind CSS\n\u2022 Step 2: Wrote optimized Dockerfile with Nginx alpine production image\n\u2022 Step 3: Configured .github/workflows/deploy.yml for ECS deployment",
+      "assignment": "\u2022 Containerize a full-stack Node.js + React app and deploy to AWS ECR / ECS Fargate.",
+      "doubts": "\u2022 Clarified environment variables passing in Docker multi-stage builds.\n\u2022 Note: Ensure ECR repository permissions allow GitHub Actions IAM role."
+    },
+    {
+      "id": "log_1789468604_2",
+      "user_email": "kishore@techwing.com",
+      "combo": "datascience-azure",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 08 - Data Analytics & AI Hub",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Anita Deshmukh",
+      "topics": "\u2022 Topic 1: PySpark Dataframe Transformations & Delta Lake\n\u2022 Topic 2: Azure Databricks Workspace & Cluster Management\n\u2022 Topic 3: Azure Synapse Analytics Data Warehousing",
+      "practical": "\u2022 Step 1: Connected Azure Data Lake Storage Gen2 to Databricks\n\u2022 Step 2: Performed aggregation and cleaning on 5M transaction records\n\u2022 Step 3: Saved structured output as Delta table with ACID transaction support",
+      "assignment": "\u2022 Create an automated Databricks job workflow that ingests daily CSV logs and updates Delta Lake target table.",
+      "doubts": "\u2022 Understood schema enforcement and schema evolution in Delta Lake.\n\u2022 Note: Auto-terminate Databricks clusters after 30 mins of inactivity."
+    },
+    {
+      "id": "log_1789468604_3",
+      "user_email": "kishore@techwing.com",
+      "combo": "aiml-gcp",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 05 - Deep Learning Hub",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Dr. Sanjay Roy",
+      "topics": "\u2022 Topic 1: TensorFlow / PyTorch Model Fine-Tuning\n\u2022 Topic 2: Vertex AI Pipelines & AutoML Integration\n\u2022 Topic 3: Hyperparameter Tuning with Vertex AI Vizier",
+      "practical": "\u2022 Step 1: Prepared dataset in Google Cloud Storage (GCS)\n\u2022 Step 2: Created custom Vertex AI training pipeline script\n\u2022 Step 3: Deployed trained vision model to Vertex AI Endpoint for REST inference",
+      "assignment": "\u2022 Fine-tune a BERT classification model on GCP Vertex AI Workbench and export endpoint API.",
+      "doubts": "\u2022 Analyzed latency trade-offs between GPU vs TPU inference nodes.\n\u2022 Note: Delete active Vertex AI endpoints when testing is completed."
+    },
+    {
+      "id": "log_1789468604_4",
+      "user_email": "kishore@techwing.com",
+      "combo": "cyber-cloud",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 01 - Cyber Defense Lab",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Captain R. K. Singh",
+      "topics": "\u2022 Topic 1: Cloud Security Posture Management (CSPM)\n\u2022 Topic 2: AWS IAM Security Best Practices & Least Privilege\n\u2022 Topic 3: SIEM Log Analysis with AWS GuardDuty & SecurityHub",
+      "practical": "\u2022 Step 1: Configured IAM Roles with permission boundaries\n\u2022 Step 2: Enabled CloudTrail multi-region logging with KMS encryption\n\u2022 Step 3: Simulated unauthorized access attempt and reviewed GuardDuty finding alert",
+      "assignment": "\u2022 Perform a security audit on an AWS account using Prowler and remediation scripts.",
+      "doubts": "\u2022 Discussed identity federation using SAML 2.0 and OAuth OpenID Connect.\n\u2022 Note: Ensure CloudTrail log bucket has Object Lock enabled."
+    },
+    {
+      "id": "log_1789468604_5",
+      "user_email": "kishore@techwing.com",
+      "combo": "python-analytics",
+      "date": "2026-09-15",
+      "day": "Tuesday",
+      "lab": "Lab 03 - Python Workspace",
+      "checkIn": "09:30",
+      "checkOut": "16:30",
+      "trainer": "Meera Nair",
+      "topics": "\u2022 Topic 1: Pandas Data Manipulation & Cleaning Techniques\n\u2022 Topic 2: Exploratory Data Analysis (EDA) with Seaborn & Matplotlib\n\u2022 Topic 3: Automated PDF & Excel Report Generation in Python",
+      "practical": "\u2022 Step 1: Loaded sales dataset and handled missing values & outliers\n\u2022 Step 2: Plotted correlation heatmaps and customer demographic distributions\n\u2022 Step 3: Exported summary metrics to automated Excel workbook",
+      "assignment": "\u2022 Conduct end-to-end EDA on an e-commerce dataset and generate an executive summary report.",
+      "doubts": "\u2022 Understood vectorized Pandas operations vs traditional Python loops performance.\n\u2022 Note: Use openpyxl engine for styled Excel exports."
+    }
+  ],
+  "suggestions": [
+    {
+      "id": "sug_1789472798",
+      "date": "2026-09-15 17:16",
+      "name": "kishore",
+      "email": "penugondakishore2006@gmail.com",
+      "category": "General Suggestion",
+      "subject": ".......",
+      "message": "............",
+      "target_whatsapp": "918074404321",
+      "status": "Received"
+    },
+    {
+      "id": "sug_1789472451",
+      "date": "2026-09-15 17:10",
+      "name": "kishore",
+      "email": "penugondakishore2006@gmail.com",
+      "category": "Curriculum & Topics",
+      "subject": "../",
+      "message": ".......",
+      "status": "Received"
+    },
+    {
+      "id": "sug_1789470716",
+      "date": "2026-09-15 16:41",
+      "name": "kishore",
+      "email": "penugondakishore2006@gmail.com",
+      "category": "Curriculum & Topics",
+      "subject": "../",
+      "message": "...",
+      "status": "Received"
+    }
+  ]
+}

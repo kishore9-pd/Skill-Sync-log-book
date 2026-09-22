@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKILLSYNC Smart Logbook & Voice AI Portal</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/static/manifest.json">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-root">
+
+    <!-- =========================================================
+         SCREEN 1: LANDING / WELCOME HERO SCREEN
+    ========================================================= -->
+    <div id="screen-landing" class="screen-view active">
+      <div class="landing-hero">
+        <div class="landing-badge">
+          <i class="fa-solid fa-graduation-cap"></i> SkillSync Smart Logbook Portal
+        </div>
+        <h1 class="landing-title">Daily Training Logbook & Voice AI Assistant</h1>
+        <p class="landing-desc">
+          Maintain your daily class records, generate official SkillSync report sheets, and talk to our Conversational AI to automatically fill out your daily training logs hands-free!
+        </p>
+
+        <div class="landing-actions" style="display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center;">
+          <button class="btn btn-primary" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;" onclick="enterMainAppDirectly()">
+            <i class="fa-solid fa-rocket"></i> Enter Dashboard & Explore Tracks
+          </button>
+          <button class="btn btn-outline" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;" onclick="showScreen('auth-register')">
+            <i class="fa-solid fa-user-plus"></i> Register Student Account
+          </button>
+          <button class="btn btn-outline" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;" onclick="showScreen('auth-login')">
+            <i class="fa-solid fa-right-to-bracket"></i> Student Login
+          </button>
+        </div>
+
+        <!-- Features Overview Grid -->
+        <div class="landing-features-grid">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <h3>Multi-Combo Tracks</h3>
+            <p>Support for GenAI + AWS, Full Stack + DevOps, Data Science + Azure, AI/ML + GCP, Cybersecurity, and Python Analytics.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+            <h3>Voice-to-Report AI</h3>
+            <p>Speak naturally into your phone or laptop mic to automatically fill out Topics, Practical Work, Tasks, and Doubts!</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-file-invoice"></i></div>
+            <h3>Exact Paper Replica</h3>
+            <p>Generate exact monochrome printable PDF logbook sheets matching the official SkillSync classroom paper template.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================================================
+         SCREEN 2: USER REGISTRATION
+    ========================================================= -->
+    <div id="screen-auth-register" class="screen-view">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h2>Create Student Account</h2>
+            <p>Register your profile and select your training combo track</p>
+          </div>
+
+          <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+            <div class="field-group">
+              <label><i class="fa-solid fa-user"></i> Full Name</label>
+              <input type="text" id="regName" class="form-input" placeholder="Enter your full name" required>
+            </div>
+            <div class="field-group">
+              <label><i class="fa-solid fa-envelope"></i> Email Address</label>
+              <input type="email" id="regEmail" class="form-input" placeholder="Enter your email address" required>
+            </div>
+            <div class="field-group">
+              <label><i class="fa-solid fa-layer-group"></i> Training Combo Track</label>
+              <select id="regCombo" class="form-input" required>
+                <optgroup label="🏗️ INFRA Track">
+                  <option value="AWS+DEVOPS">AWS + DevOps</option>
+                  <option value="AWS+AI-JFS">AWS + AI_JFS</option>
+                </optgroup>
+                <optgroup label="🚀 PROD Track">
+                  <option value="AWS+GENAI">AWS + Gen_AI</option>
+                  <option value="AWS+AGENTIC AI-JFS">AWS + Agentic_AI</option>
+                  <option value="GENAI +AGENTIC AI">Gen_AI + Agentic_AI</option>
+                </optgroup>
+                <optgroup label="💻 DEV Track">
+                  <option value="AI-JFS-devops">AI_JFS + DevOps</option>
+                  <option value="AI-JFS+AWS SA">AI_JFS + AWS_SA</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="field-group">
+              <label><i class="fa-solid fa-lock"></i> Password</label>
+              <input type="password" id="regPassword" class="form-input" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
+              <i class="fa-solid fa-user-check"></i> Complete Registration
+            </button>
+          </form>
+
+          <div class="auth-switch-text">
+            Already registered? <a onclick="showScreen('auth-login')">Log In here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================================================
+         SCREEN 3: USER LOGIN
+    ========================================================= -->
+    <div id="screen-auth-login" class="screen-view">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h2>Student & Combo Login</h2>
+            <p>Log in to access your daily training logs & AI assistant</p>
+          </div>
+
+          <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div class="field-group">
+              <label><i class="fa-solid fa-envelope"></i> Email Address</label>
+              <input type="email" id="loginEmail" class="form-input" placeholder="Enter your registered email" required>
+            </div>
+            <div class="field-group">
+              <label><i class="fa-solid fa-lock"></i> Password</label>
+              <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
+              <i class="fa-solid fa-right-to-bracket"></i> Log In to Dashboard
+            </button>
+          </form>
+
+          <div class="auth-switch-text">
+            Need a new account? <a onclick="showScreen('auth-register')">Register Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================================================
+         SCREEN 4: MAIN APP INTERFACE (SPA)
+    ========================================================= -->
+    <div id="screen-app-main" class="screen-view">
+      
+      <!-- Top Navigation Bar -->
+      <header class="app-topbar">
+        <div class="brand-badge">
+          <span class="logo">SKILLSYNC</span>
+          <span class="title" id="topbarComboTitle">GenAI + AWS</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <label for="comboSelect" style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-layer-group"></i> Active Track:</label>
+          <select id="comboSelect" class="form-input" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.85rem; font-weight: 600; color: var(--accent-primary);" onchange="handleComboChange(this.value)">
+            <optgroup label="🏗️ INFRA">
+              <option value="AWS+DEVOPS">AWS + DevOps</option>
+              <option value="AWS+AI-JFS">AWS + AI_JFS</option>
+            </optgroup>
+            <optgroup label="🚀 PROD">
+              <option value="AWS+GENAI">AWS + Gen_AI</option>
+              <option value="AWS+AGENTIC AI-JFS">AWS + Agentic_AI</option>
+              <option value="GENAI +AGENTIC AI">Gen_AI + Agentic_AI</option>
+            </optgroup>
+            <optgroup label="💻 DEV">
+              <option value="AI-JFS-devops">AI_JFS + DevOps</option>
+              <option value="AI-JFS+AWS SA">AI_JFS + AWS_SA</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="topbar-user">
+          <span class="user-combo-tag" id="userComboBadge">GenAI + AWS</span>
+          <div class="user-avatar" id="userAvatar">K</div>
+          <button class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="handleLogout()" title="Logout / Switch User">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="app-main-layout">
+        
+        <!-- Desktop Sidebar Nav -->
+        <aside class="app-sidebar">
+          <button class="app-nav-link active" onclick="switchAppTab('dashboard', this)">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+          </button>
+          <button class="app-nav-link" onclick="switchAppTab('editor', this)">
+            <i class="fa-solid fa-pen-to-square"></i> Daily Form
+          </button>
+          <button class="app-nav-link" onclick="switchAppTab('voice-ai', this)">
+            <i class="fa-solid fa-microphone-lines"></i> Voice AI Assistant
+          </button>
+          <button class="app-nav-link" onclick="switchAppTab('history', this)">
+            <i class="fa-solid fa-box-archive"></i> History Reports
+          </button>
+          <button class="app-nav-link" onclick="switchAppTab('print-sheet', this)">
+            <i class="fa-solid fa-file-invoice"></i> Printable Sheet
+          </button>
+          <button class="app-nav-link" onclick="switchAppTab('suggestions', this)">
+            <i class="fa-solid fa-lightbulb"></i> Suggestions
+          </button>
+          <button class="app-nav-link" onclick="switchAppTab('owner-portal', this)">
+            <i class="fa-solid fa-user-shield"></i> Owner Portal
+          </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+
+          <!-- TAB 1: DASHBOARD -->
+          <div id="tab-dashboard" class="tab-pane active">
+            <div class="pane-title-bar">
+              <div>
+                <h2>Training Dashboard</h2>
+                <p>Track your daily class report submission and progress</p>
+              </div>
+              <button class="btn btn-primary" onclick="switchAppTab('editor', document.querySelectorAll('.app-nav-link')[1])">
+                <i class="fa-solid fa-plus"></i> Fill Today's Log
+              </button>
+            </div>
+
+            <!-- Attendance Banner -->
+            <div class="attendance-banner">
+              <div>
+                <h3 style="font-family: var(--font-display); margin-bottom: 0.25rem;">Today's Daily Report</h3>
+                <p style="font-size: 0.88rem; color: var(--text-secondary);">Class date: <strong id="dashDateStr">2026-09-15</strong></p>
+              </div>
+              <div class="status-badge pending" id="todayStatusBadge">
+                <i class="fa-solid fa-clock"></i> Submission Pending
+              </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+              <div class="dash-stat-card">
+                <div class="icon"><i class="fa-solid fa-file-signature"></i></div>
+                <div>
+                  <h4 id="dashStatLogs">0</h4>
+                  <p>Total Forms Filled</p>
+                </div>
+              </div>
+              <div class="dash-stat-card">
+                <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div>
+                  <h4 id="dashStatCombo" style="font-size: 1.1rem; color: var(--accent-secondary);">GenAI + AWS</h4>
+                  <p>Active Combo Track</p>
+                </div>
+              </div>
+              <div class="dash-stat-card">
+                <div class="icon"><i class="fa-solid fa-fire"></i></div>
+                <div>
+                  <h4 id="dashStatStreak">1 Day</h4>
+                  <p>Submission Streak</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Reports Container -->
+            <div class="editor-card">
+              <h3 style="margin-bottom: 1rem; font-family: var(--font-display);"><i class="fa-solid fa-history" style="color: var(--accent-primary);"></i> Recent Daily Reports</h3>
+              <div id="recentReportsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Dynamically rendered -->
+              </div>
+            </div>
+          </div>
+
+
+          <!-- TAB 2: DAILY LOG EDITOR -->
+          <div id="tab-editor" class="tab-pane">
+            <div class="pane-title-bar">
+              <div>
+                <h2>Daily Logbook Form</h2>
+                <p>Fill out today's report. The exact paper sheet preview syncs in real-time on the right!</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-outline" onclick="clearFormFields()">
+                  <i class="fa-solid fa-eraser"></i> Clear Form
+                </button>
+                <button class="btn btn-outline" onclick="loadSampleData()">
+                  <i class="fa-solid fa-wand-sparkles"></i> Load Sample Data
+                </button>
+                <button class="btn btn-success" onclick="saveCurrentLog()">
+                  <i class="fa-solid fa-floppy-disk"></i> Save Report
+                </button>
+              </div>
+            </div>
+
+            <div class="form-grid-layout">
+              <!-- Left Form Controls -->
+              <div class="editor-card">
+                <div class="form-row-2">
+                  <div class="field-group">
+                    <label><i class="fa-regular fa-calendar"></i> Date</label>
+                    <input type="date" id="inputDate" class="form-input" onchange="updateLivePaper()">
+                  </div>
+                  <div class="field-group">
+                    <label><i class="fa-solid fa-calendar-day"></i> Day</label>
+                    <input type="text" id="inputDay" class="form-input" placeholder="e.g. Tuesday" oninput="updateLivePaper()">
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-laptop-code"></i> LAB / Room Location</label>
+                  <input type="text" id="inputLab" class="form-input" placeholder="e.g. Lab 04 - GenAI Hub" oninput="updateLivePaper()">
+                </div>
+
+                <div class="form-row-2">
+                  <div class="field-group">
+                    <label><i class="fa-solid fa-right-to-bracket"></i> Check-In</label>
+                    <input type="time" id="inputCheckIn" class="form-input" value="09:30" onchange="updateLivePaper()">
+                  </div>
+                  <div class="field-group">
+                    <label><i class="fa-solid fa-right-from-bracket"></i> Check-Out</label>
+                    <input type="time" id="inputCheckOut" class="form-input" value="16:30" onchange="updateLivePaper()">
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-chalkboard-user"></i> Trainer Name</label>
+                  <input type="text" id="inputTrainer" class="form-input" placeholder="Trainer Name" oninput="updateLivePaper()">
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square"></i> TOPICS COVERED TODAY</label>
+                  <textarea id="inputTopics" class="form-input" rows="4" oninput="updateLivePaper()"></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square"></i><i class="fa-solid fa-square" style="font-size: 0.6rem; margin-left: -4px;"></i> PRACTICAL / HANDS-ON WORK</label>
+                  <textarea id="inputPractical" class="form-input" rows="4" oninput="updateLivePaper()"></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square"></i> TASK / ASSIGNMENT</label>
+                  <textarea id="inputAssignment" class="form-input" rows="3" oninput="updateLivePaper()"></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square"></i><i class="fa-solid fa-square" style="font-size: 0.6rem; margin-left: -4px;"></i> DOUBTS / IMPORTANT NOTES</label>
+                  <textarea id="inputDoubts" class="form-input" rows="3" oninput="updateLivePaper()"></textarea>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveCurrentLog()">
+                  <i class="fa-solid fa-floppy-disk"></i> Save & Complete Daily Log
+                </button>
+              </div>
+
+              <!-- Right Real-Time Live Paper Sheet Preview -->
+              <div>
+                <div style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                    <i class="fa-solid fa-eye"></i> Live Paper Logbook Sheet Preview
+                  </span>
+                  <button class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="printPaperSheet()">
+                    <i class="fa-solid fa-print"></i> Print / PDF
+                  </button>
+                </div>
+
+                <!-- Exact Paper Container matching User Photo -->
+                <div class="sheet-container" id="liveSheetContainer">
+                  <div class="sheet-outer-box">
+                    <div class="sheet-header-block">
+                      <div class="sheet-title-text">
+                        <span class="sheet-title-bar"></span>
+                        TECHWING — DAILY TRAINING LOGBOOK
+                      </div>
+                      <div class="sheet-subtitle-text" id="paperHeaderSub">
+                        GenAI + AWS Training | Daily Class Record
+                      </div>
+                    </div>
+
+                    <table class="sheet-table-grid">
+                      <tr>
+                        <td class="lbl-cell">DATE</td>
+                        <td class="val-cell" id="paperDateVal">2026-09-15</td>
+                        <td class="lbl-cell">DAY</td>
+                        <td class="val-cell" id="paperDayVal">Tuesday</td>
+                      </tr>
+                      <tr>
+                        <td class="lbl-cell">LAB</td>
+                        <td class="val-cell" id="paperLabVal" colspan="3">Lab 04 - GenAI Hub</td>
+                      </tr>
+                      <tr>
+                        <td class="lbl-cell">CHECK-IN</td>
+                        <td class="val-cell" id="paperCheckInVal">09:30 AM</td>
+                        <td class="lbl-cell">CHECK-OUT</td>
+                        <td class="val-cell" id="paperCheckOutVal">04:30 PM</td>
+                      </tr>
+                      <tr>
+                        <td class="lbl-cell">TRAINER</td>
+                        <td class="val-cell" id="paperTrainerVal" style="width: 35%;">Dr. Rajesh Sharma</td>
+                        <td class="val-cell" colspan="2" style="text-align: center; color: #555555; font-size: 11px;">
+                          [ Trainer Approval & Signature ]
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div class="sec-banner"><span class="sq-symbol">■</span> TOPICS COVERED TODAY</div>
+                    <div class="sec-box-content" id="paperTopicsVal"></div>
+
+                    <div class="sec-banner"><span class="sq-symbol">■■</span> PRACTICAL / HANDS-ON WORK</div>
+                    <div class="sec-box-content" id="paperPracticalVal"></div>
+
+                    <div class="sec-banner"><span class="sq-symbol">■</span> TASK / ASSIGNMENT</div>
+                    <div class="sec-box-content" id="paperAssignmentVal"></div>
+
+                    <div class="sec-banner"><span class="sq-symbol">■■</span> DOUBTS / IMPORTANT NOTES</div>
+                    <div class="sec-box-content" id="paperDoubtsVal"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- TAB 3: VOICE CONVERSATIONAL AI ASSISTANT -->
+          <div id="tab-voice-ai" class="tab-pane">
+            <div class="pane-title-bar">
+              <div>
+                <h2>Voice Conversational AI Assistant</h2>
+                <p>Talk or type to automatically populate your daily report logbook hands-free!</p>
+              </div>
+            </div>
+
+            <!-- Target Section Chips -->
+            <div class="section-chips-bar" style="margin-bottom: 1rem;">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">
+                <i class="fa-solid fa-bullseye" style="color: var(--accent-primary);"></i> Target Section:
+              </span>
+              <div class="chips-group">
+                <button class="chip-btn active" data-target="auto" onclick="setVoiceTarget('auto', this)">Auto Detect</button>
+                <button class="chip-btn" data-target="topics" onclick="setVoiceTarget('topics', this)">Topics Covered</button>
+                <button class="chip-btn" data-target="practical" onclick="setVoiceTarget('practical', this)">Practical Work</button>
+                <button class="chip-btn" data-target="assignment" onclick="setVoiceTarget('assignment', this)">Task/Assignment</button>
+                <button class="chip-btn" data-target="doubts" onclick="setVoiceTarget('doubts', this)">Doubts/Notes</button>
+              </div>
+            </div>
+
+            <!-- Voice Control Microphone Card -->
+            <div class="voice-ai-card">
+              <h3 style="font-family: var(--font-display); font-size: 1.25rem;">
+                <i class="fa-solid fa-microphone-lines" style="color: var(--accent-purple);"></i> Speak to Fill Logbook Report
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); max-width: 500px; margin: 0.4rem auto 0 auto;">
+                Click the microphone button below and speak your notes. The AI will parse your voice and show a live demo preview of the populated section!
+              </p>
+
+              <div class="mic-button-wrapper">
+                <button class="btn-mic" id="micBtn" onclick="toggleVoiceRecording()">
+                  <i class="fa-solid fa-microphone"></i>
+                </button>
+              </div>
+
+              <div class="voice-status-text" id="voiceStatus">Click Microphone to Start Speaking</div>
+            </div>
+
+            <!-- Demo Case Form Preview Card (Voice Populated) -->
+            <div id="voiceDemoBox" class="editor-card demo-preview-card" style="margin-bottom: 1rem; display: none;">
+              <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="background: var(--accent-primary); color: #fff; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.75rem; font-weight: 700;">DEMO CASE PREVIEW</span>
+                  <h4 id="demoTargetBadge" style="font-family: var(--font-display); font-size: 1rem; margin: 0;">TOPICS COVERED TODAY</h4>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn btn-success" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="applyVoiceDemoToForm()">
+                    <i class="fa-solid fa-check-double"></i> Apply to Live Form & Sheet
+                  </button>
+                  <button class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="closeVoiceDemoBox()">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="demo-fields-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square" style="color: var(--accent-primary);"></i> Topics Covered Preview</label>
+                  <div class="demo-text-box" id="demoTopicsText"></div>
+                </div>
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square" style="color: var(--accent-secondary);"></i> Practical Work Preview</label>
+                  <div class="demo-text-box" id="demoPracticalText"></div>
+                </div>
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square" style="color: var(--accent-gold);"></i> Task / Assignment Preview</label>
+                  <div class="demo-text-box" id="demoAssignmentText"></div>
+                </div>
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square" style="color: var(--accent-purple);"></i> Doubts / Notes Preview</label>
+                  <div class="demo-text-box" id="demoDoubtsText"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Conversation Thread -->
+            <div class="chat-container">
+              <div class="chat-body" id="chatThread">
+                <div class="chat-msg-row ai">
+                  <div class="msg-text">
+Hello! I am your <strong>TECHWING Voice & Conversational AI Assistant</strong>. 🎙️
+
+You can speak by clicking the microphone button above, or type your notes below.
+For example, try saying:
+<em>"Fill Topics Covered Today with: Python Flask REST endpoints and database routing."</em>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-input-bar">
+                <input type="text" id="chatInput" class="form-input" placeholder="Type your notes or prompt (e.g. Fill topics covered with...)" onkeypress="handleChatKeyPress(event)">
+                <button class="btn btn-primary" onclick="submitChatInput()">
+                  <i class="fa-solid fa-paper-plane"></i> Send
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- TAB 4: HISTORY REPORTS -->
+          <div id="tab-history" class="tab-pane">
+            <div class="pane-title-bar">
+              <div>
+                <h2>Reports History & Exports</h2>
+                <p>Search, filter, and export past class report entries</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-outline" onclick="exportJSON()">Export JSON</button>
+                <button class="btn btn-outline" onclick="exportCSV()">Export CSV</button>
+              </div>
+            </div>
+
+            <div class="editor-card">
+              <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem;">
+                    <th style="padding: 0.75rem;">Date</th>
+                    <th style="padding: 0.75rem;">Day</th>
+                    <th style="padding: 0.75rem;">Combo</th>
+                    <th style="padding: 0.75rem;">Lab</th>
+                    <th style="padding: 0.75rem;">Trainer</th>
+                    <th style="padding: 0.75rem;">Topics Summary</th>
+                    <th style="padding: 0.75rem;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
+          <!-- TAB 5: PRINTABLE SHEET -->
+          <div id="tab-print-sheet" class="tab-pane">
+            <div class="pane-title-bar">
+              <div>
+                <h2>Official Printable Sheet</h2>
+                <p>Exact replica of official TECHWING daily log paper sheet ready for printing</p>
+              </div>
+              <button class="btn btn-primary" onclick="printPaperSheet()">
+                <i class="fa-solid fa-print"></i> Print / Save PDF
+              </button>
+            </div>
+
+            <!-- Saved Log Selector Bar -->
+            <div class="editor-card print-selector-bar" style="margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 280px;">
+                <label style="font-weight: 600; white-space: nowrap; color: var(--text-primary);">
+                  <i class="fa-solid fa-calendar-check" style="color: var(--accent-primary);"></i> Select Saved Report:
+                </label>
+                <select id="printLogSelect" class="form-input" onchange="loadLogToPrintSheet(this.value)" style="margin: 0; flex: 1;">
+                  <!-- Dynamic options populated from logs -->
+                </select>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-outline" onclick="loadActiveFormToPrintSheet()">
+                  <i class="fa-solid fa-pen-to-square"></i> Use Current Form
+                </button>
+                <button class="btn btn-primary" onclick="printPaperSheet()">
+                  <i class="fa-solid fa-print"></i> Print Sheet
+                </button>
+              </div>
+            </div>
+
+            <div id="fullSheetTarget"></div>
+          </div>
+
+
+          <!-- TAB 6: SUGGESTIONS & FEEDBACK -->
+          <div id="tab-suggestions" class="tab-pane">
+            <div class="pane-title-bar">
+              <div>
+                <h2>Student Suggestions & Feedback</h2>
+                <p>Submit your suggestions directly to the TECHWING management</p>
+              </div>
+              <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="toggleOwnerInbox()">
+                <i class="fa-solid fa-user-shield"></i> Owner Inbox Access
+              </button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 900px; margin: 0 auto;">
+              <!-- Suggestion Submission Form (Public View for All Students) -->
+              <div class="editor-card">
+                <h3 style="margin-bottom: 1rem; font-family: var(--font-display);">
+                  <i class="fa-solid fa-paper-plane" style="color: var(--accent-primary);"></i> Submit a Suggestion to App Owner
+                </h3>
+                <form id="suggestionForm" onsubmit="handleSuggestionSubmit(event)">
+                  <div class="form-row-2">
+                    <div class="field-group">
+                      <label><i class="fa-solid fa-user"></i> Your Name</label>
+                      <input type="text" id="sugName" class="form-input" placeholder="e.g. Kishore Kumar" required>
+                    </div>
+                    <div class="field-group">
+                      <label><i class="fa-solid fa-envelope"></i> Email Address</label>
+                      <input type="email" id="sugEmail" class="form-input" placeholder="e.g. kishore@techwing.com" required>
+                    </div>
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="field-group">
+                      <label><i class="fa-solid fa-tag"></i> Suggestion Category</label>
+                      <select id="sugCategory" class="form-input" required>
+                        <option value="Curriculum & Topics">Curriculum & Topics</option>
+                        <option value="Lab & Infrastructure">Lab & Infrastructure</option>
+                        <option value="Trainer Feedback">Trainer Feedback</option>
+                        <option value="App Feature Request">App Feature Request</option>
+                        <option value="General Suggestion">General Suggestion</option>
+                      </select>
+                    </div>
+                    <div class="field-group">
+                      <label><i class="fa-solid fa-heading"></i> Subject / Title</label>
+                      <input type="text" id="sugSubject" class="form-input" placeholder="Brief subject title" required>
+                    </div>
+                  </div>
+
+                  <div class="field-group">
+                    <label><i class="fa-solid fa-message"></i> Suggestion Details</label>
+                    <textarea id="sugMessage" class="form-input" rows="4" placeholder="Write your suggestion or feedback here..." required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; font-size: 1rem; padding: 0.8rem;">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Suggestion to Management
+                  </button>
+                </form>
+              </div>
+
+              <!-- Received Suggestions List (Protected: App Owner Only) -->
+              <div id="ownerInboxCard" class="editor-card" style="display: none; border: 1px solid var(--accent-purple);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                  <h3 style="font-family: var(--font-display); margin: 0; color: var(--accent-purple);">
+                    <i class="fa-solid fa-user-shield"></i> Owner Private Suggestions Inbox
+                  </h3>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="status-badge completed" id="sugCountBadge">0 Received</span>
+                    <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="hideOwnerInbox()">Close</button>
+                  </div>
+                </div>
+                <div id="suggestionsList" style="display: flex; flex-direction: column; gap: 0.88rem; max-height: 500px; overflow-y: auto;">
+                  <!-- Rendered dynamically for owner -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- TAB 7: OWNER MONITORING PORTAL -->
+          <div id="tab-owner-portal" class="tab-pane">
+            <div class="pane-title-bar">
+              <div>
+                <h2><i class="fa-solid fa-user-shield" style="color: var(--accent-purple);"></i> Owner Monitoring Portal</h2>
+                <p>Master overview of student activity, logs, roster, & system reports</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-outline" style="font-size: 0.82rem;" onclick="loadOwnerMasterData()">
+                  <i class="fa-solid fa-rotate"></i> Refresh Data
+                </button>
+                <button class="btn btn-primary" style="font-size: 0.82rem;" onclick="exportMasterDataJSON()">
+                  <i class="fa-solid fa-download"></i> Export Master JSON
+                </button>
+              </div>
+            </div>
+
+            <!-- Passcode Verification Gate if locked -->
+            <div id="ownerGateCard" class="editor-card" style="text-align: center; max-width: 500px; margin: 3rem auto; padding: 2.5rem;">
+              <div style="font-size: 3rem; color: var(--accent-purple); margin-bottom: 1rem;">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <h3 style="font-family: var(--font-display); margin-bottom: 0.5rem;">Protected Owner Access</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                Enter Owner Passcode to unlock master system monitoring dashboard and student roster.
+              </p>
+              <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <input type="password" id="ownerPasscodePrompt" class="form-input" placeholder="Enter Owner Passcode" style="max-width: 250px;">
+                <button class="btn btn-primary" onclick="unlockOwnerPortal()">
+                  <i class="fa-solid fa-key"></i> Unlock
+                </button>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem;">
+                Authorized Owner Email (kishore@techwing.com) unlocks automatically.
+              </p>
+            </div>
+
+            <!-- Main Owner Dashboard View (hidden until unlocked) -->
+            <div id="ownerDashboardView" style="display: none;">
+              
+              <!-- Metrics Cards -->
+              <div class="stats-row" style="margin-bottom: 1.5rem;">
+                <div class="dash-stat-card">
+                  <div class="icon" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-primary);"><i class="fa-solid fa-users"></i></div>
+                  <div>
+                    <h4 id="ownerTotalStudents">0</h4>
+                    <p>Registered Students</p>
+                  </div>
+                </div>
+                <div class="dash-stat-card">
+                  <div class="icon" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple);"><i class="fa-solid fa-file-invoice"></i></div>
+                  <div>
+                    <h4 id="ownerTotalLogs">0</h4>
+                    <p>Total Master Logs</p>
+                  </div>
+                </div>
+                <div class="dash-stat-card">
+                  <div class="icon" style="background: rgba(34, 197, 94, 0.15); color: var(--accent-green);"><i class="fa-solid fa-lightbulb"></i></div>
+                  <div>
+                    <h4 id="ownerTotalSuggestions">0</h4>
+                    <p>Student Suggestions</p>
+                  </div>
+                </div>
+                <div class="dash-stat-card">
+                  <div class="icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);"><i class="fa-solid fa-layer-group"></i></div>
+                  <div>
+                    <h4 id="ownerActiveCombos">6</h4>
+                    <p>Active Combo Tracks</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Owner Sub-Tabs Navigation -->
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="btnOwnerSubLogs" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('master-logs')">
+                  <i class="fa-solid fa-list-check"></i> Master Student Logs
+                </button>
+                <button class="btn btn-outline" id="btnOwnerSubRoster" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('student-roster')">
+                  <i class="fa-solid fa-id-card"></i> Student Accounts Roster
+                </button>
+                <button class="btn btn-outline" id="btnOwnerSubInbox" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('suggestions-inbox')">
+                  <i class="fa-solid fa-inbox"></i> Suggestions Inbox
+                </button>
+                <button class="btn btn-outline" id="btnOwnerSubDb" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('db-inspector')">
+                  <i class="fa-solid fa-server"></i> Database Inspector & Audits
+                </button>
+              </div>
+
+              <!-- Sub-Tab 1: Master Logs Table -->
+              <div id="ownerSub-master-logs" class="editor-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <h3 style="font-family: var(--font-display); margin: 0;">Master Student Training Logs</h3>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="ownerLogSearch" class="form-input" placeholder="Search by email, combo, or date..." style="font-size: 0.85rem; width: 260px;" onkeyup="filterOwnerLogs()">
+                    <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="exportMasterLogsCSV()">
+                      <i class="fa-solid fa-file-csv"></i> CSV
+                    </button>
+                  </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                    <thead>
+                      <tr style="border-bottom: 2px solid var(--border-color); text-align: left; color: var(--text-secondary);">
+                        <th style="padding: 0.75rem;">Date</th>
+                        <th style="padding: 0.75rem;">Student Email</th>
+                        <th style="padding: 0.75rem;">Combo Track</th>
+                        <th style="padding: 0.75rem;">Lab / Trainer</th>
+                        <th style="padding: 0.75rem;">Topics Covered</th>
+                        <th style="padding: 0.75rem;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ownerMasterLogsTbody">
+                      <!-- Rendered dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Sub-Tab 2: Student Accounts Roster -->
+              <div id="ownerSub-student-roster" class="editor-card" style="display: none;">
+                <h3 style="font-family: var(--font-display); margin-bottom: 1rem;">Registered Student Accounts Roster</h3>
+                <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                    <thead>
+                      <tr style="border-bottom: 2px solid var(--border-color); text-align: left; color: var(--text-secondary);">
+                        <th style="padding: 0.75rem;">Student Name</th>
+                        <th style="padding: 0.75rem;">Email Address</th>
+                        <th style="padding: 0.75rem;">Combo Track</th>
+                        <th style="padding: 0.75rem;">Logs Submitted</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ownerStudentRosterTbody">
+                      <!-- Rendered dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Sub-Tab 3: Private Suggestions Inbox -->
+              <div id="ownerSub-suggestions-inbox" class="editor-card" style="display: none;">
+                <h3 style="font-family: var(--font-display); margin-bottom: 1rem; color: var(--accent-purple);">
+                  <i class="fa-solid fa-paper-plane"></i> Private Suggestions & Feedback Inbox
+                </h3>
+                <div id="ownerPortalSuggestionsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Sub-Tab 4: Database Inspector -->
+              <div id="ownerSub-db-inspector" class="editor-card" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <h3 style="font-family: var(--font-display); margin: 0; color: var(--accent-primary);">
+                    <i class="fa-solid fa-server"></i> Server Database & Audit Inspector
+                  </h3>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="inspectServerDatabase()">
+                      <i class="fa-solid fa-rotate"></i> Refresh Inspector
+                    </button>
+                    <button class="btn btn-primary" style="font-size: 0.8rem;" onclick="downloadDatabaseFile()">
+                      <i class="fa-solid fa-download"></i> Download SQLite DB
+                    </button>
+                  </div>
+                </div>
+
+                <div id="dbInspectorContent" style="display: flex; flex-direction: column; gap: 1rem;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-bottom-nav">
+        <button class="mobile-nav-item active" onclick="switchAppTab('dashboard', this)">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Home</span>
+        </button>
+        <button class="mobile-nav-item" onclick="switchAppTab('editor', this)">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Form</span>
+        </button>
+        <button class="mobile-nav-item" onclick="switchAppTab('voice-ai', this)">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span>Voice AI</span>
+        </button>
+        <button class="mobile-nav-item" onclick="switchAppTab('history', this)">
+          <i class="fa-solid fa-box-archive"></i>
+          <span>Reports</span>
+        </button>
+        <button class="mobile-nav-item" onclick="switchAppTab('print-sheet', this)">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Print</span>
+        </button>
+        <button class="mobile-nav-item" onclick="switchAppTab('suggestions', this)">
+          <i class="fa-solid fa-lightbulb"></i>
+          <span>Feedback</span>
+        </button>
+        <button class="mobile-nav-item" onclick="switchAppTab('owner-portal', this)">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Owner</span>
+        </button>
+      </nav>
+
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
