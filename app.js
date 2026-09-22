@@ -97,12 +97,6 @@ function handleInitialUrlRouting() {
     return;
   }
 
-  if (path === '/owner' || hash === '#owner') {
-    enterMainApp();
-    switchAppTab('owner-portal', null, false);
-    return;
-  }
-
   checkSavedUserSession();
 }
 
@@ -329,8 +323,7 @@ function switchAppTab(tabId, btnEl, updateUrl = true) {
   if (pane) pane.classList.add('active');
 
   if (updateUrl) {
-    let routePath = '/' + tabId;
-    if (tabId === 'owner-portal') routePath = '/owner';
+    const routePath = '/' + tabId;
 
     if (window.location.pathname !== routePath) {
       window.history.pushState({ tabId }, '', routePath);
@@ -339,12 +332,6 @@ function switchAppTab(tabId, btnEl, updateUrl = true) {
 
   if (tabId === 'dashboard') renderDashboard();
   if (tabId === 'history') renderHistoryTable();
-  if (tabId === 'owner-portal') {
-    const user = appState.currentUser;
-    if (user && user.email.toLowerCase() === 'kishore@techwing.com') {
-      unlockOwnerPortal();
-    }
-  }
   if (tabId === 'print-sheet') {
     populatePrintLogSelect();
     const select = document.getElementById('printLogSelect');

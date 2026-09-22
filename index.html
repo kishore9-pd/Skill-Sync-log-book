@@ -214,9 +214,6 @@
           <button class="app-nav-link" onclick="switchAppTab('suggestions', this)">
             <i class="fa-solid fa-lightbulb"></i> Suggestions
           </button>
-          <button class="app-nav-link" onclick="switchAppTab('owner-portal', this)">
-            <i class="fa-solid fa-user-shield"></i> Owner Portal
-          </button>
         </aside>
 
         <!-- Main Content Area -->
@@ -607,9 +604,6 @@ For example, try saying:
                 <h2>Student Suggestions & Feedback</h2>
                 <p>Submit your suggestions directly to the TECHWING management</p>
               </div>
-              <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="toggleOwnerInbox()">
-                <i class="fa-solid fa-user-shield"></i> Owner Inbox Access
-              </button>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 900px; margin: 0 auto;">
@@ -657,21 +651,6 @@ For example, try saying:
                 </form>
               </div>
 
-              <!-- Received Suggestions List (Protected: App Owner Only) -->
-              <div id="ownerInboxCard" class="editor-card" style="display: none; border: 1px solid var(--accent-purple);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-                  <h3 style="font-family: var(--font-display); margin: 0; color: var(--accent-purple);">
-                    <i class="fa-solid fa-user-shield"></i> Owner Private Suggestions Inbox
-                  </h3>
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="status-badge completed" id="sugCountBadge">0 Received</span>
-                    <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="hideOwnerInbox()">Close</button>
-                  </div>
-                </div>
-                <div id="suggestionsList" style="display: flex; flex-direction: column; gap: 0.88rem; max-height: 500px; overflow-y: auto;">
-                  <!-- Rendered dynamically for owner -->
-                </div>
-              </div>
             </div>
           </div>
 
@@ -877,10 +856,6 @@ For example, try saying:
         <button class="mobile-nav-item" onclick="switchAppTab('suggestions', this)">
           <i class="fa-solid fa-lightbulb"></i>
           <span>Feedback</span>
-        </button>
-        <button class="mobile-nav-item" onclick="switchAppTab('owner-portal', this)">
-          <i class="fa-solid fa-user-shield"></i>
-          <span>Owner</span>
         </button>
       </nav>
 

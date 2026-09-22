@@ -71,6 +71,7 @@ class DailyLog(db.Model):
     practical = db.Column(db.Text, nullable=True)
     assignment = db.Column(db.Text, nullable=True)
     doubts = db.Column(db.Text, nullable=True)
+    important_notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -93,6 +94,7 @@ class DailyLog(db.Model):
             'practical': self.practical or '',
             'assignment': self.assignment or '',
             'doubts': self.doubts or '',
+            'important_notes': self.important_notes or '',
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None
         }

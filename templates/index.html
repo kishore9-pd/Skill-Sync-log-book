@@ -103,7 +103,7 @@
             </div>
             <div class="field-group">
               <label><i class="fa-solid fa-id-card"></i> College PIN Number</label>
-              <input type="text" id="regPin" class="form-input" placeholder="Enter your 10-digit college PIN" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required>
+              <input type="text" id="regPin" class="form-input" placeholder="Enter your 10-character alphanumeric college PIN" inputmode="text" pattern="[A-Za-z0-9]{10}" minlength="10" maxlength="10" required>
             </div>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;">
@@ -211,9 +211,6 @@
           <button class="app-nav-link" onclick="switchAppTab('suggestions', this)">
             <i class="fa-solid fa-lightbulb"></i> Suggestions
           </button>
-          <button class="app-nav-link" onclick="switchAppTab('owner-portal', this)">
-            <i class="fa-solid fa-user-shield"></i> Owner Portal
-          </button>
         </aside>
 
         <!-- Main Content Area -->
@@ -235,7 +232,7 @@
             <div class="attendance-banner">
               <div>
                 <h3 style="font-family: var(--font-display); margin-bottom: 0.25rem;">Today's Daily Report</h3>
-                <p style="font-size: 0.88rem; color: var(--text-secondary);">Class date: <strong id="dashDateStr">2026-09-15</strong></p>
+                <p style="font-size: 0.88rem; color: var(--text-secondary);">Class date: <strong id="dashDateStr"></strong></p>
               </div>
               <div class="status-badge pending" id="todayStatusBadge">
                 <i class="fa-solid fa-clock"></i> Submission Pending
@@ -331,18 +328,18 @@
                 </div>
 
                 <div class="field-group">
-                  <label><i class="fa-solid fa-square"></i><i class="fa-solid fa-square" style="font-size: 0.6rem; margin-left: -4px;"></i> PRACTICAL / HANDS-ON WORK</label>
-                  <textarea id="inputPractical" class="form-input" rows="4" oninput="updateLivePaper()"></textarea>
-                </div>
-
-                <div class="field-group">
                   <label><i class="fa-solid fa-square"></i> TASK / ASSIGNMENT</label>
                   <textarea id="inputAssignment" class="form-input" rows="3" oninput="updateLivePaper()"></textarea>
                 </div>
 
                 <div class="field-group">
-                  <label><i class="fa-solid fa-square"></i><i class="fa-solid fa-square" style="font-size: 0.6rem; margin-left: -4px;"></i> DOUBTS / IMPORTANT NOTES</label>
+                  <label><i class="fa-solid fa-square"></i> DOUBTS</label>
                   <textarea id="inputDoubts" class="form-input" rows="3" oninput="updateLivePaper()"></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square"></i> IMPORTANT NOTES</label>
+                  <textarea id="inputImportantNotes" class="form-input" rows="3" oninput="updateLivePaper()"></textarea>
                 </div>
 
                 <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveCurrentLog()">
@@ -377,9 +374,9 @@
                     <table class="sheet-table-grid">
                       <tr>
                         <td class="lbl-cell">DATE</td>
-                        <td class="val-cell" id="paperDateVal">2026-09-15</td>
+                        <td class="val-cell" id="paperDateVal"></td>
                         <td class="lbl-cell">DAY</td>
-                        <td class="val-cell" id="paperDayVal">Tuesday</td>
+                        <td class="val-cell" id="paperDayVal"></td>
                       </tr>
                       <tr>
                         <td class="lbl-cell">LAB</td>
@@ -403,14 +400,14 @@
                     <div class="sec-banner"><span class="sq-symbol">■</span> TOPICS COVERED TODAY</div>
                     <div class="sec-box-content" id="paperTopicsVal"></div>
 
-                    <div class="sec-banner"><span class="sq-symbol">■■</span> PRACTICAL / HANDS-ON WORK</div>
-                    <div class="sec-box-content" id="paperPracticalVal"></div>
-
                     <div class="sec-banner"><span class="sq-symbol">■</span> TASK / ASSIGNMENT</div>
                     <div class="sec-box-content" id="paperAssignmentVal"></div>
 
-                    <div class="sec-banner"><span class="sq-symbol">■■</span> DOUBTS / IMPORTANT NOTES</div>
+                    <div class="sec-banner"><span class="sq-symbol">■</span> DOUBTS</div>
                     <div class="sec-box-content" id="paperDoubtsVal"></div>
+
+                    <div class="sec-banner"><span class="sq-symbol">■</span> IMPORTANT NOTES</div>
+                    <div class="sec-box-content" id="paperImportantNotesVal"></div>
                   </div>
                 </div>
               </div>
@@ -435,9 +432,9 @@
               <div class="chips-group">
                 <button class="chip-btn active" data-target="auto" onclick="setVoiceTarget('auto', this)">Auto Detect</button>
                 <button class="chip-btn" data-target="topics" onclick="setVoiceTarget('topics', this)">Topics Covered</button>
-                <button class="chip-btn" data-target="practical" onclick="setVoiceTarget('practical', this)">Practical Work</button>
                 <button class="chip-btn" data-target="assignment" onclick="setVoiceTarget('assignment', this)">Task/Assignment</button>
-                <button class="chip-btn" data-target="doubts" onclick="setVoiceTarget('doubts', this)">Doubts/Notes</button>
+                <button class="chip-btn" data-target="doubts" onclick="setVoiceTarget('doubts', this)">Doubts</button>
+                <button class="chip-btn" data-target="important" onclick="setVoiceTarget('important', this)">Important Notes</button>
               </div>
             </div>
 
@@ -482,16 +479,16 @@
                   <div class="demo-text-box" id="demoTopicsText"></div>
                 </div>
                 <div class="field-group">
-                  <label><i class="fa-solid fa-square" style="color: var(--accent-secondary);"></i> Practical Work Preview</label>
-                  <div class="demo-text-box" id="demoPracticalText"></div>
-                </div>
-                <div class="field-group">
                   <label><i class="fa-solid fa-square" style="color: var(--accent-gold);"></i> Task / Assignment Preview</label>
                   <div class="demo-text-box" id="demoAssignmentText"></div>
                 </div>
                 <div class="field-group">
-                  <label><i class="fa-solid fa-square" style="color: var(--accent-purple);"></i> Doubts / Notes Preview</label>
+                  <label><i class="fa-solid fa-square" style="color: var(--accent-purple);"></i> Doubts Preview</label>
                   <div class="demo-text-box" id="demoDoubtsText"></div>
+                </div>
+                <div class="field-group">
+                  <label><i class="fa-solid fa-square" style="color: var(--accent-secondary);"></i> Important Notes Preview</label>
+                  <div class="demo-text-box" id="demoImportantNotesText"></div>
                 </div>
               </div>
             </div>
@@ -597,9 +594,6 @@ For example, try saying:
                 <h2>Student Suggestions & Feedback</h2>
                 <p>Submit your suggestions directly to SkillSync management</p>
               </div>
-              <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="toggleOwnerInbox()">
-                <i class="fa-solid fa-user-shield"></i> Owner Inbox Access
-              </button>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 900px; margin: 0 auto;">
@@ -647,117 +641,11 @@ For example, try saying:
                 </form>
               </div>
 
-              <!-- Received Suggestions List (Protected: App Owner Only) -->
-              <div id="ownerInboxCard" class="editor-card" style="display: none; border: 1px solid var(--accent-purple);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-                  <h3 style="font-family: var(--font-display); margin: 0; color: var(--accent-purple);">
-                    <i class="fa-solid fa-user-shield"></i> Owner Private Suggestions Inbox
-                  </h3>
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="status-badge completed" id="sugCountBadge">0 Received</span>
-                    <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="hideOwnerInbox()">Close</button>
-                  </div>
-                </div>
-                <div id="suggestionsList" style="display: flex; flex-direction: column; gap: 0.88rem; max-height: 500px; overflow-y: auto;">
-                  <!-- Rendered dynamically for owner -->
-                </div>
-              </div>
             </div>
           </div>
 
 
-          <!-- TAB 7: OWNER MONITORING PORTAL -->
-          <div id="tab-owner-portal" class="tab-pane">
-            <div class="pane-title-bar">
-              <div>
-                <h2><i class="fa-solid fa-user-shield" style="color: var(--accent-purple);"></i> Owner Monitoring Portal</h2>
-                <p>Master overview of student activity, logs, roster, & system reports</p>
-              </div>
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-outline" style="font-size: 0.82rem;" onclick="loadOwnerMasterData()">
-                  <i class="fa-solid fa-rotate"></i> Refresh Data
-                </button>
-                <button class="btn btn-primary" style="font-size: 0.82rem;" onclick="exportMasterDataJSON()">
-                  <i class="fa-solid fa-download"></i> Export Master JSON
-                </button>
-              </div>
-            </div>
 
-            <!-- Passcode Verification Gate if locked -->
-            <div id="ownerGateCard" class="editor-card" style="text-align: center; max-width: 500px; margin: 3rem auto; padding: 2.5rem;">
-              <div style="font-size: 3rem; color: var(--accent-purple); margin-bottom: 1rem;">
-                <i class="fa-solid fa-lock"></i>
-              </div>
-              <h3 style="font-family: var(--font-display); margin-bottom: 0.5rem;">Protected Owner Access</h3>
-              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                Enter Owner Passcode to unlock master system monitoring dashboard and student roster.
-              </p>
-              <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                <input type="password" id="ownerPasscodePrompt" class="form-input" placeholder="Enter Owner Passcode" style="max-width: 250px;">
-                <button class="btn btn-primary" onclick="unlockOwnerPortal()">
-                  <i class="fa-solid fa-key"></i> Unlock
-                </button>
-              </div>
-              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem;">
-                Authorized Owner Email (kishore@techwing.com) unlocks automatically.
-              </p>
-            </div>
-
-            <!-- Main Owner Dashboard View (hidden until unlocked) -->
-            <div id="ownerDashboardView" style="display: none;">
-              
-              <!-- Metrics Cards -->
-              <div class="stats-row" style="margin-bottom: 1.5rem;">
-                <div class="dash-stat-card">
-                  <div class="icon" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-primary);"><i class="fa-solid fa-users"></i></div>
-                  <div>
-                    <h4 id="ownerTotalStudents">0</h4>
-                    <p>Registered Students</p>
-                  </div>
-                </div>
-                <div class="dash-stat-card">
-                  <div class="icon" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple);"><i class="fa-solid fa-file-invoice"></i></div>
-                  <div>
-                    <h4 id="ownerTotalLogs">0</h4>
-                    <p>Total Master Logs</p>
-                  </div>
-                </div>
-                <div class="dash-stat-card">
-                  <div class="icon" style="background: rgba(34, 197, 94, 0.15); color: var(--accent-green);"><i class="fa-solid fa-lightbulb"></i></div>
-                  <div>
-                    <h4 id="ownerTotalSuggestions">0</h4>
-                    <p>Student Suggestions</p>
-                  </div>
-                </div>
-                <div class="dash-stat-card">
-                  <div class="icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold);"><i class="fa-solid fa-layer-group"></i></div>
-                  <div>
-                    <h4 id="ownerActiveCombos">6</h4>
-                    <p>Active Combo Tracks</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Owner Sub-Tabs Navigation -->
-              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" id="btnOwnerSubLogs" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('master-logs')">
-                  <i class="fa-solid fa-list-check"></i> Master Student Logs
-                </button>
-                <button class="btn btn-outline" id="btnOwnerSubRoster" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('student-roster')">
-                  <i class="fa-solid fa-id-card"></i> Student Accounts Roster
-                </button>
-                <button class="btn btn-outline" id="btnOwnerSubInbox" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('suggestions-inbox')">
-                  <i class="fa-solid fa-inbox"></i> Suggestions Inbox
-                </button>
-                <button class="btn btn-outline" id="btnOwnerSubDb" style="font-size: 0.85rem;" onclick="switchOwnerSubTab('db-inspector')">
-                  <i class="fa-solid fa-server"></i> Database Inspector & Audits
-                </button>
-              </div>
-
-              <!-- Sub-Tab 1: Master Logs Table -->
-              <div id="ownerSub-master-logs" class="editor-card">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                  <h3 style="font-family: var(--font-display); margin: 0;">Master Student Training Logs</h3>
                   <div style="display: flex; gap: 0.5rem;">
                     <input type="text" id="ownerLogSearch" class="form-input" placeholder="Search by email, combo, or date..." style="font-size: 0.85rem; width: 260px;" onkeyup="filterOwnerLogs()">
                     <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="exportMasterLogsCSV()">
@@ -867,10 +755,6 @@ For example, try saying:
         <button class="mobile-nav-item" onclick="switchAppTab('suggestions', this)">
           <i class="fa-solid fa-lightbulb"></i>
           <span>Feedback</span>
-        </button>
-        <button class="mobile-nav-item" onclick="switchAppTab('owner-portal', this)">
-          <i class="fa-solid fa-user-shield"></i>
-          <span>Owner</span>
         </button>
       </nav>
 

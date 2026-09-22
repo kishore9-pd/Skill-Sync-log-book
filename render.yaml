@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: techwing-daily-logbook
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: PORT
+        value: "10000"
+      - key: ADMIN_EMAIL
+        value: "penugondakishore2006@gmail.com"
+      - key: DATABASE_URL
+        sync: false

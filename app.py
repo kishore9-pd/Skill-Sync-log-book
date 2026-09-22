@@ -148,9 +148,13 @@ with app.app_context():
     if 'pin_number' not in {column['name'] for column in inspect(db.engine).get_columns('users')}:
         with db.engine.begin() as connection:
             connection.execute(text('ALTER TABLE users ADD COLUMN pin_number VARCHAR(255)'))
+    daily_log_columns = {column['name'] for column in inspect(db.engine).get_columns('daily_logs')}
+    if 'important_notes' not in daily_log_columns:
+        with db.engine.begin() as connection:
+            connection.execute(text('ALTER TABLE daily_logs ADD COLUMN important_notes TEXT'))
     for existing_user in User.query.filter(User.pin_number.isnot(None)).all():
-        if existing_user.pin_number.isdigit() and len(existing_user.pin_number) == 10:
-            existing_user.set_college_pin(existing_user.pin_number)
+        if len(existing_user.pin_number.strip()) == 10 and existing_user.pin_number.strip().isalnum():
+            existing_user.set_college_pin(existing_user.pin_number.strip())
     db.session.commit()
     run_migration(app)
 
@@ -165,7 +169,6 @@ with app.app_context():
 @app.route('/history')
 @app.route('/print-sheet')
 @app.route('/suggestions')
-@app.route('/owner')
 @app.route('/tracks/<combo_key>')
 def index(combo_key=None):
     return render_template('index.html')
@@ -186,8 +189,9 @@ def register_user():
     if not email or not name or not password or not pin:
         return jsonify({'error': 'Name, Email, Password, and College PIN are required'}), 400
 
-    if not pin.isdigit() or len(pin) != 10:
-        return jsonify({'error': 'College PIN must contain exactly 10 digits'}), 400
+    pin = pin.strip()
+    if len(pin) != 10 or not pin.isalnum():
+        return jsonify({'error': 'College PIN must contain exactly 10 alphanumeric characters'}), 400
 
     existing_user = User.query.filter(User.email.ilike(email)).first()
     if existing_user:
@@ -289,6 +293,11 @@ def save_log():
     req_id = data.get('id')
     is_update = data.get('is_update', False)
     user_email = data.get('user_email', 'kishore@techwing.com').strip().lower()
+    topics = data.get('topics', '').strip()
+    assignment = data.get('assignment', '').strip()
+
+    if not topics or not assignment:
+        return jsonify({'error': 'Topics Covered and Task / Assignment are required.'}), 400
 
     owner_user = User.query.filter(User.email.ilike(user_email)).first()
     if not owner_user:
@@ -317,6 +326,7 @@ def save_log():
         existing_log.practical = data.get('practical', '')
         existing_log.assignment = data.get('assignment', '')
         existing_log.doubts = data.get('doubts', '')
+        existing_log.important_notes = data.get('important_notes', data.get('importantNotes', ''))
         existing_log.updated_at = datetime.utcnow()
         target_log = existing_log
         msg = 'Existing log updated successfully'
@@ -336,7 +346,8 @@ def save_log():
             topics=data.get('topics', ''),
             practical=data.get('practical', ''),
             assignment=data.get('assignment', ''),
-            doubts=data.get('doubts', '')
+            doubts=data.get('doubts', ''),
+            important_notes=data.get('important_notes', data.get('importantNotes', ''))
         )
         db.session.add(new_log)
         target_log = new_log
@@ -398,9 +409,9 @@ def ai_parse_voice():
     lower_text = text.lower()
 
     parsed_topics = ""
-    parsed_practical = ""
     parsed_assignment = ""
     parsed_doubts = ""
+    parsed_important_notes = ""
 
     target_section = 'auto'
     target_name = "Dynamic AI Structurer"
@@ -409,67 +420,35 @@ def ai_parse_voice():
         target_section = 'topics'
         target_name = "TOPICS COVERED TODAY"
         parsed_topics = struct_to_bullets(text, "• Topic")
-    elif requested_target == 'practical':
-        target_section = 'practical'
-        target_name = "PRACTICAL / HANDS-ON WORK"
-        parsed_practical = struct_to_bullets(text, "• Step")
     elif requested_target == 'assignment':
         target_section = 'assignment'
         target_name = "TASK / ASSIGNMENT"
         parsed_assignment = struct_to_bullets(text, "• Task")
     elif requested_target == 'doubts':
         target_section = 'doubts'
-        target_name = "DOUBTS / IMPORTANT NOTES"
+        target_name = "DOUBTS"
         parsed_doubts = struct_to_bullets(text, "• Doubt")
+    elif requested_target in ['important', 'important_notes', 'notes']:
+        target_section = 'important_notes'
+        target_name = "IMPORTANT NOTES"
+        parsed_important_notes = struct_to_bullets(text, "• Note")
     else:
         has_topics = any(k in lower_text for k in ['topic', 'covered', 'learned', 'studied', 'theory', 'concept', 'lecture', 'session'])
-        has_practical = any(k in lower_text for k in ['practical', 'hands-on', 'hands on', 'lab', 'built', 'coded', 'code', 'created', 'implemented', 'developed', 'step'])
         has_assignment = any(k in lower_text for k in ['assignment', 'task', 'homework', 'exercise', 'assigned', 'challenge'])
-        has_doubts = any(k in lower_text for k in ['doubt', 'doubts', 'note', 'notes', 'question', 'clarification', 'issue', 'important'])
+        has_doubts = any(k in lower_text for k in ['doubt', 'doubts', 'question', 'clarification', 'issue'])
+        has_important_notes = any(k in lower_text for k in ['important', 'note', 'notes'])
 
-        if 'practical' in lower_text or 'hands-on' in lower_text or 'hands on' in lower_text:
-            import re
-            parts = re.split(r'(topics|topic|covered|practical|hands-on|hands on|lab|assignment|task|doubts|doubt|notes):?', lower_text, flags=re.IGNORECASE)
-
-            cur_sec = 'topics'
-            sec_texts = {'topics': [], 'practical': [], 'assignment': [], 'doubts': []}
-
-            for part in parts:
-                p_clean = part.strip()
-                p_low = p_clean.lower()
-                if p_low in ['topics', 'topic', 'covered']:
-                    cur_sec = 'topics'
-                elif p_low in ['practical', 'hands-on', 'hands on', 'lab']:
-                    cur_sec = 'practical'
-                elif p_low in ['assignment', 'task']:
-                    cur_sec = 'assignment'
-                elif p_low in ['doubts', 'doubt', 'notes']:
-                    cur_sec = 'doubts'
-                elif p_clean:
-                    sec_texts[cur_sec].append(p_clean)
-
-            if sec_texts['topics']:
-                parsed_topics = struct_to_bullets(" ".join(sec_texts['topics']), "• Topic")
-            if sec_texts['practical']:
-                parsed_practical = struct_to_bullets(" ".join(sec_texts['practical']), "• Step")
-            if sec_texts['assignment']:
-                parsed_assignment = struct_to_bullets(" ".join(sec_texts['assignment']), "• Task")
-            if sec_texts['doubts']:
-                parsed_doubts = struct_to_bullets(" ".join(sec_texts['doubts']), "• Doubt")
-
-            target_section = 'multi'
-            target_name = "Multi-Section AI Extracted"
-        elif has_practical and not has_topics:
-            target_section = 'practical'
-            target_name = "PRACTICAL / HANDS-ON WORK"
-            parsed_practical = struct_to_bullets(text, "• Step")
-        elif has_assignment and not has_topics:
+        if has_assignment and not has_topics:
             target_section = 'assignment'
             target_name = "TASK / ASSIGNMENT"
             parsed_assignment = struct_to_bullets(text, "• Task")
+        elif has_important_notes and not has_topics:
+            target_section = 'important_notes'
+            target_name = "IMPORTANT NOTES"
+            parsed_important_notes = struct_to_bullets(text, "• Note")
         elif has_doubts and not has_topics:
             target_section = 'doubts'
-            target_name = "DOUBTS / IMPORTANT NOTES"
+            target_name = "DOUBTS"
             parsed_doubts = struct_to_bullets(text, "• Doubt")
         else:
             target_section = 'topics'
@@ -487,9 +466,9 @@ def ai_parse_voice():
         'target_name': target_name,
         'prompt_text': text,
         'topics': parsed_topics,
-        'practical': parsed_practical,
         'assignment': parsed_assignment,
-        'doubts': parsed_doubts
+        'doubts': parsed_doubts,
+        'important_notes': parsed_important_notes
     })
 
 @app.route('/api/suggestions', methods=['GET'])
@@ -546,7 +525,6 @@ def save_suggestion():
         'suggestion': sug_entry.to_dict()
     })
 
-@app.route('/api/owner/master', methods=['GET'])
 def get_owner_master():
     passcode = request.args.get('passcode', '')
     email = request.args.get('email', '').lower()
@@ -592,7 +570,6 @@ def get_owner_master():
         'combos': COMBO_CONFIGS
     })
 
-@app.route('/api/owner/inspect-db', methods=['GET'])
 def inspect_database():
     passcode = request.args.get('passcode', '')
     email = request.args.get('email', '').lower()
@@ -645,7 +622,6 @@ def inspect_database():
         'recent_audits': [a.to_dict() for a in AuditLog.query.order_by(AuditLog.created_at.desc()).limit(10).all()]
     })
 
-@app.route('/api/owner/download-db', methods=['GET'])
 def download_database():
     passcode = request.args.get('passcode', '')
     email = request.args.get('email', '').lower()

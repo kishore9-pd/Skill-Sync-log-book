@@ -97,12 +97,6 @@ function handleInitialUrlRouting() {
     return;
   }
 
-  if (path === '/owner' || hash === '#owner') {
-    enterMainApp();
-    switchAppTab('owner-portal', null, false);
-    return;
-  }
-
   checkSavedUserSession();
 }
 
@@ -148,8 +142,8 @@ async function handleRegisterSubmit(e) {
   const password = document.getElementById('regPassword').value;
   const pin = document.getElementById('regPin').value.trim();
 
-  if (!/^\d{10}$/.test(pin)) {
-    alert('College PIN must contain exactly 10 digits.');
+  if (!/^[A-Za-z0-9]{10}$/.test(pin)) {
+    alert('College PIN must contain exactly 10 alphanumeric characters.');
     return;
   }
 
@@ -297,14 +291,14 @@ function applyComboDefaultsToForm(comboKey) {
   const topicsEl = document.getElementById('inputTopics');
   if (topicsEl && !topicsEl.value.trim()) topicsEl.placeholder = config.topics || '';
 
-  const practicalEl = document.getElementById('inputPractical');
-  if (practicalEl && !practicalEl.value.trim()) practicalEl.placeholder = config.practical || '';
-
   const assignEl = document.getElementById('inputAssignment');
   if (assignEl && !assignEl.value.trim()) assignEl.placeholder = config.assignment || '';
 
   const doubtsEl = document.getElementById('inputDoubts');
   if (doubtsEl && !doubtsEl.value.trim()) doubtsEl.placeholder = config.doubts || '';
+
+  const importantNotesEl = document.getElementById('inputImportantNotes');
+  if (importantNotesEl && !importantNotesEl.value.trim()) importantNotesEl.placeholder = config.importantNotes || '';
 }
 
 // Enter Main Application Dashboard
@@ -357,8 +351,7 @@ function switchAppTab(tabId, btnEl, updateUrl = true) {
   if (pane) pane.classList.add('active');
 
   if (updateUrl) {
-    let routePath = '/' + tabId;
-    if (tabId === 'owner-portal') routePath = '/owner';
+    const routePath = '/' + tabId;
 
     if (window.location.pathname !== routePath) {
       window.history.pushState({ tabId }, '', routePath);
@@ -367,12 +360,6 @@ function switchAppTab(tabId, btnEl, updateUrl = true) {
 
   if (tabId === 'dashboard') renderDashboard();
   if (tabId === 'history') renderHistoryTable();
-  if (tabId === 'owner-portal') {
-    const user = appState.currentUser;
-    if (user && user.email.toLowerCase() === 'kishore@techwing.com') {
-      unlockOwnerPortal();
-    }
-  }
   if (tabId === 'print-sheet') {
     populatePrintLogSelect();
     const select = document.getElementById('printLogSelect');
@@ -385,14 +372,25 @@ function switchAppTab(tabId, btnEl, updateUrl = true) {
 }
 
 // Form Defaults & Real-Time Sync
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function initDateDefaults() {
   const today = new Date();
-  const dateStr = today.toISOString().split('T')[0];
+  const dateStr = getLocalDateString(today);
   const dayStr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
 
-  document.getElementById('inputDate').value = dateStr;
-  document.getElementById('inputDay').value = dayStr;
-  document.getElementById('dashDateStr').innerText = dateStr;
+  const inputDate = document.getElementById('inputDate');
+  const inputDay = document.getElementById('inputDay');
+  const dashDate = document.getElementById('dashDateStr');
+
+  if (inputDate) inputDate.value = dateStr;
+  if (inputDay) inputDay.value = dayStr;
+  if (dashDate) dashDate.innerText = dateStr;
 }
 
 function updateLivePaper() {
@@ -403,9 +401,9 @@ function updateLivePaper() {
   const checkOutVal = formatTime(document.getElementById('inputCheckOut').value) || '';
   const trainerVal = document.getElementById('inputTrainer').value || '';
   const topicsVal = document.getElementById('inputTopics').value || '';
-  const practicalVal = document.getElementById('inputPractical').value || '';
   const assignmentVal = document.getElementById('inputAssignment').value || '';
   const doubtsVal = document.getElementById('inputDoubts').value || '';
+  const importantNotesVal = document.getElementById('inputImportantNotes').value || '';
 
   document.getElementById('paperDateVal').innerText = dateVal;
   document.getElementById('paperDayVal').innerText = dayVal;
@@ -415,9 +413,9 @@ function updateLivePaper() {
   document.getElementById('paperTrainerVal').innerText = trainerVal;
 
   document.getElementById('paperTopicsVal').innerText = topicsVal;
-  document.getElementById('paperPracticalVal').innerText = practicalVal;
   document.getElementById('paperAssignmentVal').innerText = assignmentVal;
   document.getElementById('paperDoubtsVal').innerText = doubtsVal;
+  document.getElementById('paperImportantNotesVal').innerText = importantNotesVal;
 
   syncFullPrintSheet();
 }
@@ -444,9 +442,9 @@ function clearFormFields() {
   document.getElementById('inputLab').value = '';
   document.getElementById('inputTrainer').value = '';
   document.getElementById('inputTopics').value = '';
-  document.getElementById('inputPractical').value = '';
   document.getElementById('inputAssignment').value = '';
   document.getElementById('inputDoubts').value = '';
+  document.getElementById('inputImportantNotes').value = '';
   document.getElementById('inputCheckIn').value = '';
   document.getElementById('inputCheckOut').value = '';
   appState.activeEditingLogId = null;
@@ -459,17 +457,17 @@ function loadSampleData() {
     defaultLab: 'Lab 04 - GenAI Hub',
     defaultTrainer: 'Dr. Rajesh Sharma',
     topics: '• Topic 1: GenAI & LLMs\n• Topic 2: Vector Search & Bedrock',
-    practical: '• Lab Step 1: Configured Bedrock Titan Embeddings\n• Lab Step 2: Created OpenSearch Index',
     assignment: '• Build a RAG Q&A bot using LangChain.',
-    doubts: '• Discussed dense vs sparse vector search.'
+    doubts: '• Discussed dense vs sparse vector search.',
+    importantNotes: '• Review the vector search design and ask for queries before deployment.'
   };
 
   document.getElementById('inputLab').value = config.defaultLab || 'Lab 04';
   document.getElementById('inputTrainer').value = config.defaultTrainer || 'Dr. Rajesh Sharma';
   document.getElementById('inputTopics').value = config.topics || '';
-  document.getElementById('inputPractical').value = config.practical || '';
   document.getElementById('inputAssignment').value = config.assignment || '';
   document.getElementById('inputDoubts').value = config.doubts || '';
+  document.getElementById('inputImportantNotes').value = config.importantNotes || '';
   document.getElementById('inputCheckIn').value = '09:30';
   document.getElementById('inputCheckOut').value = '16:30';
 
@@ -485,13 +483,18 @@ async function saveCurrentLog() {
   const checkInVal = document.getElementById('inputCheckIn').value;
   const checkOutVal = document.getElementById('inputCheckOut').value;
   const trainerVal = document.getElementById('inputTrainer').value;
-  const topicsVal = document.getElementById('inputTopics').value;
-  const practicalVal = document.getElementById('inputPractical').value;
-  const assignmentVal = document.getElementById('inputAssignment').value;
-  const doubtsVal = document.getElementById('inputDoubts').value;
+  const topicsVal = document.getElementById('inputTopics').value.trim();
+  const assignmentVal = document.getElementById('inputAssignment').value.trim();
+  const doubtsVal = document.getElementById('inputDoubts').value.trim();
+  const importantNotesVal = document.getElementById('inputImportantNotes').value.trim();
 
-  if (!topicsVal && !practicalVal && !assignmentVal) {
-    alert("Please enter details in Topics, Practical, or Task before saving.");
+  if (!topicsVal) {
+    alert('Topics Covered Today is mandatory.');
+    return;
+  }
+
+  if (!assignmentVal) {
+    alert('Task / Assignment is mandatory.');
     return;
   }
 
@@ -509,9 +512,10 @@ async function saveCurrentLog() {
     checkOut: checkOutVal,
     trainer: trainerVal,
     topics: topicsVal,
-    practical: practicalVal,
+    practical: '',
     assignment: assignmentVal,
-    doubts: doubtsVal
+    doubts: doubtsVal,
+    important_notes: importantNotesVal
   };
 
   try {
@@ -563,9 +567,9 @@ function renderVoiceDemoPreview(data) {
   }
 
   document.getElementById('demoTopicsText').innerText = data.topics || "(Empty)";
-  document.getElementById('demoPracticalText').innerText = data.practical || "(Empty)";
   document.getElementById('demoAssignmentText').innerText = data.assignment || "(Empty)";
   document.getElementById('demoDoubtsText').innerText = data.doubts || "(Empty)";
+  document.getElementById('demoImportantNotesText').innerText = data.important_notes || data.importantNotes || "(Empty)";
 
   if (demoBox) {
     demoBox.style.display = 'block';
@@ -580,9 +584,9 @@ function applyVoiceDemoToForm() {
 
   // Append or set dynamic fields from voice AI
   if (data.topics) document.getElementById('inputTopics').value = data.topics;
-  if (data.practical) document.getElementById('inputPractical').value = data.practical;
   if (data.assignment) document.getElementById('inputAssignment').value = data.assignment;
   if (data.doubts) document.getElementById('inputDoubts').value = data.doubts;
+  if (data.important_notes || data.importantNotes) document.getElementById('inputImportantNotes').value = data.important_notes || data.importantNotes;
 
   // Ensure active log ID is cleared so saving creates a brand new separate form
   appState.activeEditingLogId = null;
@@ -634,17 +638,21 @@ function initSpeechRecognition() {
         })
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Voice parsing failed on the server.');
 
       appendChatMessage('ai', data.reply);
       renderVoiceDemoPreview(data);
 
       if (data.topics) document.getElementById('inputTopics').value = data.topics;
-      if (data.practical) document.getElementById('inputPractical').value = data.practical;
       if (data.assignment) document.getElementById('inputAssignment').value = data.assignment;
       if (data.doubts) document.getElementById('inputDoubts').value = data.doubts;
+      if (data.important_notes || data.importantNotes) document.getElementById('inputImportantNotes').value = data.important_notes || data.importantNotes;
 
       updateLivePaper();
     } catch (e) {
+      const message = `Voice parsing failed: ${e.message}. You can type the same note in the chat box.`;
+      document.getElementById('voiceStatus').innerText = message;
+      appendChatMessage('ai', message);
       console.error(e);
     }
   };
@@ -662,16 +670,32 @@ function initSpeechRecognition() {
 }
 
 function toggleVoiceRecording() {
+  const status = document.getElementById('voiceStatus');
+
   if (!appState.recognition) {
-    alert('Voice Speech Recognition is supported in Chrome, Edge, and Safari browsers.');
+    if (status) status.innerText = 'Voice input is not supported in this browser. Please use Chrome or Edge and type your notes in the chat box.';
+    alert('Voice Speech Recognition is supported in Chrome, Edge, and Safari browsers. Use Chrome/Edge and allow microphone permission.');
     return;
   }
 
   if (appState.isListening) {
     appState.recognition.stop();
     stopVoiceRecording();
+    return;
+  }
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(() => {
+        appState.recognition.start();
+      })
+      .catch(() => {
+        if (status) status.innerText = 'Microphone permission was blocked. Please allow access or type your notes in the chat box.';
+        alert('Microphone permission was blocked. Please allow microphone access or use the chat box instead.');
+      });
   } else {
-    appState.recognition.start();
+    if (status) status.innerText = 'Microphone access is unavailable in this browser. Please type your notes in the chat box.';
+    alert('Microphone access is unavailable in this browser. Please type your notes in the chat box.');
   }
 }
 
@@ -700,15 +724,23 @@ function submitChatInput() {
       combo: appState.activeCombo,
       target_section: appState.voiceTargetSection
     })
-  }).then(res => res.json()).then(data => {
+  }).then(async res => {
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Voice parsing failed on the server.');
+    return data;
+  }).then(data => {
     appendChatMessage('ai', data.reply);
     renderVoiceDemoPreview(data);
 
     if (data.topics) document.getElementById('inputTopics').value = data.topics;
-    if (data.practical) document.getElementById('inputPractical').value = data.practical;
     if (data.assignment) document.getElementById('inputAssignment').value = data.assignment;
     if (data.doubts) document.getElementById('inputDoubts').value = data.doubts;
+    if (data.important_notes || data.importantNotes) document.getElementById('inputImportantNotes').value = data.important_notes || data.importantNotes;
     updateLivePaper();
+  }).catch(error => {
+    const message = `Voice parsing failed: ${error.message}.`;
+    appendChatMessage('ai', message);
+    console.error(error);
   });
 }
 
@@ -733,7 +765,7 @@ function escapeHtml(s) {
    DASHBOARD METRICS & RECENT LOGS
    ========================================================= */
 function renderDashboard() {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString(new Date());
   const submittedToday = appState.logs.some(l => l.date === todayStr);
 
   const badge = document.getElementById('todayStatusBadge');
@@ -856,14 +888,14 @@ function renderBlankPrintSheet() {
         <div class="sec-banner"><span class="sq-symbol">■</span> TOPICS COVERED TODAY</div>
         <div class="sec-box-content" style="color: #888;">Select a saved report date above to populate topics covered.</div>
 
-        <div class="sec-banner"><span class="sq-symbol">■■</span> PRACTICAL / HANDS-ON WORK</div>
-        <div class="sec-box-content" style="color: #888;">Select a saved report date above to populate practical work.</div>
-
         <div class="sec-banner"><span class="sq-symbol">■</span> TASK / ASSIGNMENT</div>
         <div class="sec-box-content" style="color: #888;">Select a saved report date above to populate assignment.</div>
 
-        <div class="sec-banner"><span class="sq-symbol">■■</span> DOUBTS / IMPORTANT NOTES</div>
-        <div class="sec-box-content" style="color: #888;">Select a saved report date above to populate doubts/notes.</div>
+        <div class="sec-banner"><span class="sq-symbol">■</span> DOUBTS</div>
+        <div class="sec-box-content" style="color: #888;">Select a saved report date above to populate doubts.</div>
+
+        <div class="sec-banner"><span class="sq-symbol">■</span> IMPORTANT NOTES</div>
+        <div class="sec-box-content" style="color: #888;">Select a saved report date above to populate important notes.</div>
       </div>
     </div>
   `;
@@ -928,14 +960,14 @@ function loadLogToPrintSheet(logId) {
         <div class="sec-banner"><span class="sq-symbol">■</span> TOPICS COVERED TODAY</div>
         <div class="sec-box-content">${escapeHtml(log.topics || '')}</div>
 
-        <div class="sec-banner"><span class="sq-symbol">■■</span> PRACTICAL / HANDS-ON WORK</div>
-        <div class="sec-box-content">${escapeHtml(log.practical || '')}</div>
-
         <div class="sec-banner"><span class="sq-symbol">■</span> TASK / ASSIGNMENT</div>
         <div class="sec-box-content">${escapeHtml(log.assignment || '')}</div>
 
-        <div class="sec-banner"><span class="sq-symbol">■■</span> DOUBTS / IMPORTANT NOTES</div>
+        <div class="sec-banner"><span class="sq-symbol">■</span> DOUBTS</div>
         <div class="sec-box-content">${escapeHtml(log.doubts || '')}</div>
+
+        <div class="sec-banner"><span class="sq-symbol">■</span> IMPORTANT NOTES</div>
+        <div class="sec-box-content">${escapeHtml(log.important_notes || '')}</div>
       </div>
     </div>
   `;
@@ -965,7 +997,7 @@ function renderHistoryTable() {
       <td style="padding: 0.75rem;"><span style="color: var(--accent-secondary); font-weight: 600;">${l.combo}</span></td>
       <td style="padding: 0.75rem;">${l.lab || 'N/A'}</td>
       <td style="padding: 0.75rem;">${l.trainer || 'N/A'}</td>
-      <td style="padding: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${(l.topics || l.practical || '').split('\n')[0]}</td>
+      <td style="padding: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${(l.topics || '').split('\n')[0]}</td>
       <td style="padding: 0.75rem;">
         <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="loadLogToForm('${l.id}')">Open / Edit</button>
       </td>
@@ -986,9 +1018,9 @@ function loadLogToForm(logId) {
   document.getElementById('inputCheckOut').value = log.checkOut || '';
   document.getElementById('inputTrainer').value = log.trainer || '';
   document.getElementById('inputTopics').value = log.topics || '';
-  document.getElementById('inputPractical').value = log.practical || '';
   document.getElementById('inputAssignment').value = log.assignment || '';
   document.getElementById('inputDoubts').value = log.doubts || '';
+  document.getElementById('inputImportantNotes').value = log.important_notes || '';
 
   updateLivePaper();
   switchAppTab('editor', document.querySelectorAll('.app-nav-link')[1]);
@@ -1117,20 +1149,25 @@ async function handleSuggestionSubmit(e) {
 async function syncOfflineData() {
   const offlineLogs = JSON.parse(localStorage.getItem('techwing_offline_logs') || '[]');
   if (offlineLogs.length > 0) {
+    let allLogsSynced = true;
     for (const log of offlineLogs) {
       try {
-        await fetch('/api/logs', {
+        const response = await fetch('/api/logs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(log)
         });
+        if (!response.ok) allLogsSynced = false;
       } catch (e) {
+        allLogsSynced = false;
         console.warn('Could not sync log entry:', e);
       }
     }
-    localStorage.removeItem('techwing_offline_logs');
-    console.log('✅ Synced offline log reports to Python server!');
-    if (appState.currentUser) fetchUserLogs();
+    if (allLogsSynced) {
+      localStorage.removeItem('techwing_offline_logs');
+      console.log('Synced offline log reports to Python server.');
+      if (appState.currentUser) fetchUserLogs();
+    }
   }
 
   const offlineSuggestions = JSON.parse(localStorage.getItem('techwing_offline_suggestions') || '[]');
