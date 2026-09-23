@@ -432,11 +432,30 @@ function updateLivePaper() {
 
 function formatTime(t) {
   if (!t) return '';
-  const [h, m] = t.split(':');
+  const normalized = normalizeTime(t);
+  if (!normalized) return t;
+  const [h, m] = normalized.split(':');
   let hour = parseInt(h, 10);
   const ampm = hour >= 12 ? 'PM' : 'AM';
   hour = hour % 12 || 12;
   return `${hour.toString().padStart(2, '0')}:${m} ${ampm}`;
+}
+
+function normalizeTime(value) {
+  const match = String(value || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return '';
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const meridiem = match[3]?.toUpperCase();
+  if (minute > 59) return '';
+  if (meridiem) {
+    if (hour < 1 || hour > 12) return '';
+    if (meridiem === 'PM' && hour !== 12) hour += 12;
+    if (meridiem === 'AM' && hour === 12) hour = 0;
+  } else if (hour > 23) {
+    return '';
+  }
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
 function syncFullPrintSheet() {
@@ -478,8 +497,8 @@ function loadSampleData() {
   document.getElementById('inputAssignment').value = config.assignment || '';
   document.getElementById('inputDoubts').value = config.doubts || '';
   document.getElementById('inputImportantNotes').value = config.importantNotes || '';
-  document.getElementById('inputCheckIn').value = '09:30';
-  document.getElementById('inputCheckOut').value = '16:30';
+  document.getElementById('inputCheckIn').value = '09:30 AM';
+  document.getElementById('inputCheckOut').value = '04:30 PM';
 
   updateLivePaper();
   alert("Sample data loaded into form!");
@@ -490,8 +509,8 @@ async function saveCurrentLog() {
   const dateVal = document.getElementById('inputDate').value;
   const dayVal = document.getElementById('inputDay').value;
   const labVal = document.getElementById('inputLab').value;
-  const checkInVal = document.getElementById('inputCheckIn').value;
-  const checkOutVal = document.getElementById('inputCheckOut').value;
+  const checkInVal = normalizeTime(document.getElementById('inputCheckIn').value);
+  const checkOutVal = normalizeTime(document.getElementById('inputCheckOut').value);
   const trainerVal = document.getElementById('inputTrainer').value;
   const topicsVal = document.getElementById('inputTopics').value.trim();
   const assignmentVal = document.getElementById('inputAssignment').value.trim();
@@ -500,7 +519,7 @@ async function saveCurrentLog() {
 
   const missingFields = [
     ['Date', dateVal], ['Day', dayVal], ['Lab / Room Location', labVal],
-    ['Check-In', checkInVal], ['Check-Out', checkOutVal], ['Trainer Name', trainerVal],
+    ['Check-In (use hh:mm AM/PM)', checkInVal], ['Check-Out (use hh:mm AM/PM)', checkOutVal], ['Trainer Name', trainerVal],
     ['Topics Covered Today', topicsVal], ['Task / Assignment', assignmentVal]
   ].filter(([, value]) => !value).map(([label]) => label);
 
@@ -617,14 +636,14 @@ function initSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     const status = document.getElementById('voiceStatus');
-    if (status) status.innerText = 'Speech recognition requires Chrome/Edge browser.';
+    if (status) status.innerText = 'Voice input is unavailable in this browser. Use the text box below.';
     return;
   }
 
   const recognition = new SpeechRecognition();
   recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.lang = navigator.language || 'en-US';
 
   recognition.onstart = () => {
     appState.isListening = true;
@@ -669,8 +688,16 @@ function initSpeechRecognition() {
   };
 
   recognition.onerror = (e) => {
-    console.error(e);
-    stopVoiceRecording();
+    console.error('Speech recognition error:', e.error);
+    const messages = {
+      'not-allowed': 'Microphone permission was blocked. Allow microphone access for this site, then try again.',
+      'service-not-allowed': 'Speech recognition is blocked by the browser. Use the text box below.',
+      'no-speech': 'No speech detected. Please speak after the microphone starts.',
+      'network': 'Speech service connection failed. Check the internet and try again.'
+    };
+    const status = document.getElementById('voiceStatus');
+    if (status) status.innerText = messages[e.error] || 'Voice input failed. Please try again or type below.';
+    stopVoiceRecording(false);
   };
 
   recognition.onend = () => {
@@ -684,8 +711,7 @@ function toggleVoiceRecording() {
   const status = document.getElementById('voiceStatus');
 
   if (!appState.recognition) {
-    if (status) status.innerText = 'Voice input is not supported in this browser. Please use Chrome or Edge and type your notes in the chat box.';
-    alert('Voice Speech Recognition is supported in Chrome, Edge, and Safari browsers. Use Chrome/Edge and allow microphone permission.');
+    if (status) status.innerText = 'Voice input is unavailable in this browser. Please type your notes in the chat box below.';
     return;
   }
 
@@ -695,27 +721,20 @@ function toggleVoiceRecording() {
     return;
   }
 
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(() => {
-        appState.recognition.start();
-      })
-      .catch(() => {
-        if (status) status.innerText = 'Microphone permission was blocked. Please allow access or type your notes in the chat box.';
-        alert('Microphone permission was blocked. Please allow microphone access or use the chat box instead.');
-      });
-  } else {
-    if (status) status.innerText = 'Microphone access is unavailable in this browser. Please type your notes in the chat box.';
-    alert('Microphone access is unavailable in this browser. Please type your notes in the chat box.');
+  try {
+    appState.recognition.start();
+  } catch (error) {
+    if (status) status.innerText = 'Could not start the microphone. Allow access for this site and try again.';
+    console.error('Could not start speech recognition:', error);
   }
 }
 
-function stopVoiceRecording() {
+function stopVoiceRecording(resetStatus = true) {
   appState.isListening = false;
   const btn = document.getElementById('micBtn');
   if (btn) btn.classList.remove('listening');
   const status = document.getElementById('voiceStatus');
-  if (status) status.innerText = 'Click Microphone to Start Speaking';
+  if (status && resetStatus) status.innerText = 'Click Microphone to Start Speaking';
 }
 
 // Conversational AI Chat
@@ -1031,8 +1050,8 @@ function loadLogToForm(logId) {
   document.getElementById('inputDate').value = log.date;
   document.getElementById('inputDay').value = log.day;
   document.getElementById('inputLab').value = log.lab || '';
-  document.getElementById('inputCheckIn').value = log.checkIn || '';
-  document.getElementById('inputCheckOut').value = log.checkOut || '';
+  document.getElementById('inputCheckIn').value = formatTime(log.checkIn) || '';
+  document.getElementById('inputCheckOut').value = formatTime(log.checkOut) || '';
   document.getElementById('inputTrainer').value = log.trainer || '';
   document.getElementById('inputTopics').value = log.topics || '';
   document.getElementById('inputAssignment').value = log.assignment || '';
@@ -1327,21 +1346,6 @@ function renderOwnerMasterLogsTable(logsList) {
       </td>
     </tr>
   `).join('');
-}
-
-function filterOwnerLogs() {
-  const query = document.getElementById('ownerLogSearch')?.value.toLowerCase().trim() || '';
-  if (!query) {
-    renderOwnerMasterLogsTable(ownerState.masterLogs);
-    return;
-  }
-  const filtered = ownerState.masterLogs.filter(l => 
-    (l.user_email && l.user_email.toLowerCase().includes(query)) ||
-    (l.combo && l.combo.toLowerCase().includes(query)) ||
-    (l.date && l.date.includes(query)) ||
-    (l.topics && l.topics.toLowerCase().includes(query))
-  );
-  renderOwnerMasterLogsTable(filtered);
 }
 
 function renderOwnerStudentRoster(usersList) {

@@ -309,11 +309,11 @@
                 <div class="form-row-2">
                   <div class="field-group">
                     <label><i class="fa-solid fa-right-to-bracket"></i> Check-In</label>
-                    <input type="time" id="inputCheckIn" class="form-input" value="09:30" onchange="updateLivePaper()" required>
+                    <input type="text" id="inputCheckIn" class="form-input" value="09:30 AM" placeholder="hh:mm AM/PM" inputmode="text" autocomplete="off" onchange="updateLivePaper()" required>
                   </div>
                   <div class="field-group">
                     <label><i class="fa-solid fa-right-from-bracket"></i> Check-Out</label>
-                    <input type="time" id="inputCheckOut" class="form-input" value="16:30" onchange="updateLivePaper()" required>
+                    <input type="text" id="inputCheckOut" class="form-input" value="04:30 PM" placeholder="hh:mm AM/PM" inputmode="text" autocomplete="off" onchange="updateLivePaper()" required>
                   </div>
                 </div>
 
@@ -647,90 +647,6 @@ For example, try saying:
 
             </div>
           </div>
-
-
-
-                  <div style="display: flex; gap: 0.5rem;">
-                    <input type="text" id="ownerLogSearch" class="form-input" placeholder="Search by email, combo, or date..." style="font-size: 0.85rem; width: 260px;" onkeyup="filterOwnerLogs()">
-                    <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="exportMasterLogsCSV()">
-                      <i class="fa-solid fa-file-csv"></i> CSV
-                    </button>
-                  </div>
-                </div>
-                
-                <div style="overflow-x: auto;">
-                  <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
-                    <thead>
-                      <tr style="border-bottom: 2px solid var(--border-color); text-align: left; color: var(--text-secondary);">
-                        <th style="padding: 0.75rem;">Date</th>
-                        <th style="padding: 0.75rem;">Student Email</th>
-                        <th style="padding: 0.75rem;">Combo Track</th>
-                        <th style="padding: 0.75rem;">Lab / Trainer</th>
-                        <th style="padding: 0.75rem;">Topics Covered</th>
-                        <th style="padding: 0.75rem;">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody id="ownerMasterLogsTbody">
-                      <!-- Rendered dynamically -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Sub-Tab 2: Student Accounts Roster -->
-              <div id="ownerSub-student-roster" class="editor-card" style="display: none;">
-                <h3 style="font-family: var(--font-display); margin-bottom: 1rem;">Registered Student Accounts Roster</h3>
-                <div style="overflow-x: auto;">
-                  <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
-                    <thead>
-                      <tr style="border-bottom: 2px solid var(--border-color); text-align: left; color: var(--text-secondary);">
-                        <th style="padding: 0.75rem;">Student Name</th>
-                        <th style="padding: 0.75rem;">Email Address</th>
-                        <th style="padding: 0.75rem;">Combo Track</th>
-                        <th style="padding: 0.75rem;">Logs Submitted</th>
-                      </tr>
-                    </thead>
-                    <tbody id="ownerStudentRosterTbody">
-                      <!-- Rendered dynamically -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Sub-Tab 3: Private Suggestions Inbox -->
-              <div id="ownerSub-suggestions-inbox" class="editor-card" style="display: none;">
-                <h3 style="font-family: var(--font-display); margin-bottom: 1rem; color: var(--accent-purple);">
-                  <i class="fa-solid fa-paper-plane"></i> Private Suggestions & Feedback Inbox
-                </h3>
-                <div id="ownerPortalSuggestionsList" style="display: flex; flex-direction: column; gap: 1rem;">
-                  <!-- Rendered dynamically -->
-                </div>
-              </div>
-
-              <!-- Sub-Tab 4: Database Inspector -->
-              <div id="ownerSub-db-inspector" class="editor-card" style="display: none;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                  <h3 style="font-family: var(--font-display); margin: 0; color: var(--accent-primary);">
-                    <i class="fa-solid fa-server"></i> Server Database & Audit Inspector
-                  </h3>
-                  <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="inspectServerDatabase()">
-                      <i class="fa-solid fa-rotate"></i> Refresh Inspector
-                    </button>
-                    <button class="btn btn-primary" style="font-size: 0.8rem;" onclick="downloadDatabaseFile()">
-                      <i class="fa-solid fa-download"></i> Download SQLite DB
-                    </button>
-                  </div>
-                </div>
-
-                <div id="dbInspectorContent" style="display: flex; flex-direction: column; gap: 1rem;">
-                  <!-- Rendered dynamically -->
-                </div>
-              </div>
-
-            </div>
-          </div>
-
         </main>
       </div>
 
@@ -766,6 +682,6 @@ For example, try saying:
 
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=3"></script>
 </body>
 </html>
