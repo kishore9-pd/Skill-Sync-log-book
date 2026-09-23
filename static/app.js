@@ -13,7 +13,9 @@ let appState = {
   lastParsedAiData: null,
   activeEditingLogId: null,
   isListening: false,
-  recognition: null
+  recognition: null,
+  mediaRecorder: null,
+  audioChunks: []
 };
 
 // Initialize Application
@@ -631,12 +633,92 @@ function closeVoiceDemoBox() {
   if (demoBox) demoBox.style.display = 'none';
 }
 
+async function processVoiceTranscript(transcript) {
+  const cleanTranscript = String(transcript || '').trim();
+  if (!cleanTranscript) return;
+  document.getElementById('voiceStatus').innerText = `Recorded: "${cleanTranscript}"`;
+  appendChatMessage('user', `🎙️ Spoken: "${cleanTranscript}"`);
+
+  try {
+    const res = await fetch('/api/ai/parse-voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: cleanTranscript,
+        combo: appState.activeCombo,
+        target_section: appState.voiceTargetSection
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Voice parsing failed on the server.');
+
+    appendChatMessage('ai', data.reply);
+    renderVoiceDemoPreview(data);
+    if (data.topics) document.getElementById('inputTopics').value = data.topics;
+    if (data.assignment) document.getElementById('inputAssignment').value = data.assignment;
+    if (data.doubts) document.getElementById('inputDoubts').value = data.doubts;
+    if (data.important_notes || data.importantNotes) document.getElementById('inputImportantNotes').value = data.important_notes || data.importantNotes;
+    updateLivePaper();
+  } catch (error) {
+    const message = `Voice parsing failed: ${error.message}. You can type the same note in the chat box.`;
+    document.getElementById('voiceStatus').innerText = message;
+    appendChatMessage('ai', message);
+    console.error(error);
+  }
+}
+
+// Browser recording fallback for mobile browsers without Web Speech API.
+async function startAudioRecording() {
+  const status = document.getElementById('voiceStatus');
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    if (status) status.innerText = 'Audio recording is unavailable. Please type your notes below.';
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mimeType = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm']
+      .find(type => MediaRecorder.isTypeSupported(type)) || '';
+    const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+    appState.mediaRecorder = recorder;
+    appState.audioChunks = [];
+    recorder.ondataavailable = event => {
+      if (event.data.size) appState.audioChunks.push(event.data);
+    };
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(track => track.stop());
+      const blob = new Blob(appState.audioChunks, { type: recorder.mimeType || 'audio/webm' });
+      appState.mediaRecorder = null;
+      appState.audioChunks = [];
+      stopVoiceRecording(false);
+      if (status) status.innerText = 'Transcribing your recording...';
+      const formData = new FormData();
+      formData.append('audio', blob, `voice.${blob.type.includes('mp4') ? 'mp4' : 'webm'}`);
+      try {
+        const response = await fetch('/api/ai/transcribe-voice', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Transcription failed.');
+        await processVoiceTranscript(data.text);
+      } catch (error) {
+        if (status) status.innerText = error.message;
+        console.error('Audio transcription failed:', error);
+      }
+    };
+    recorder.start();
+    appState.isListening = true;
+    document.getElementById('micBtn').classList.add('listening');
+    if (status) status.innerText = '🎙️ Recording... tap the microphone again when finished.';
+  } catch (error) {
+    if (status) status.innerText = 'Microphone permission was blocked. Allow access and try again.';
+    console.error('Could not start audio recording:', error);
+  }
+}
+
 // Voice Speech Recognition Engine (Web Speech API)
 function initSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     const status = document.getElementById('voiceStatus');
-    if (status) status.innerText = 'Voice input is unavailable in this browser. Use the text box below.';
+    if (status) status.innerText = 'Tap the microphone to record; audio will be transcribed securely.';
     return;
   }
 
@@ -651,41 +733,7 @@ function initSpeechRecognition() {
     document.getElementById('voiceStatus').innerText = '🎙️ Listening to your voice... Speak now!';
   };
 
-  recognition.onresult = async (event) => {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById('voiceStatus').innerText = `Recorded: "${transcript}"`;
-    appendChatMessage('user', `🎙️ Spoken: "${transcript}"`);
-
-    // Send to Python AI Voice Parser with target section
-    try {
-      const res = await fetch('/api/ai/parse-voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: transcript,
-          combo: appState.activeCombo,
-          target_section: appState.voiceTargetSection
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Voice parsing failed on the server.');
-
-      appendChatMessage('ai', data.reply);
-      renderVoiceDemoPreview(data);
-
-      if (data.topics) document.getElementById('inputTopics').value = data.topics;
-      if (data.assignment) document.getElementById('inputAssignment').value = data.assignment;
-      if (data.doubts) document.getElementById('inputDoubts').value = data.doubts;
-      if (data.important_notes || data.importantNotes) document.getElementById('inputImportantNotes').value = data.important_notes || data.importantNotes;
-
-      updateLivePaper();
-    } catch (e) {
-      const message = `Voice parsing failed: ${e.message}. You can type the same note in the chat box.`;
-      document.getElementById('voiceStatus').innerText = message;
-      appendChatMessage('ai', message);
-      console.error(e);
-    }
-  };
+  recognition.onresult = event => processVoiceTranscript(event.results[0][0].transcript);
 
   recognition.onerror = (e) => {
     console.error('Speech recognition error:', e.error);
@@ -711,7 +759,11 @@ function toggleVoiceRecording() {
   const status = document.getElementById('voiceStatus');
 
   if (!appState.recognition) {
-    if (status) status.innerText = 'Voice input is unavailable in this browser. Please type your notes in the chat box below.';
+    if (appState.mediaRecorder) {
+      appState.mediaRecorder.stop();
+    } else {
+      startAudioRecording();
+    }
     return;
   }
 

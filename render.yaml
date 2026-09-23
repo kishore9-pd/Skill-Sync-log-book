@@ -18,6 +18,10 @@ services:
         fromDatabase:
           name: techwing-daily-log-db
           property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_TRANSCRIPTION_MODEL
+        value: whisper-1
 
 databases:
   - name: techwing-daily-log-db

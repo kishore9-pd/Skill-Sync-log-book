@@ -12,6 +12,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_migrate import Migrate
 from sqlalchemy import inspect, text
 from dotenv import load_dotenv
+import requests
 
 # Load environment variables from .env
 load_dotenv()
@@ -510,6 +511,35 @@ def ai_parse_voice():
         'doubts': parsed_doubts,
         'important_notes': parsed_important_notes
     })
+
+@app.route('/api/ai/transcribe-voice', methods=['POST'])
+def transcribe_voice():
+    """Transcribe recorded browser audio for browsers without Web Speech API."""
+    api_key = os.environ.get('OPENAI_API_KEY', '').strip()
+    audio = request.files.get('audio')
+    if not api_key:
+        return jsonify({'error': 'Voice transcription is not configured on the server.'}), 503
+    if not audio:
+        return jsonify({'error': 'No audio recording was received.'}), 400
+
+    try:
+        response = requests.post(
+            'https://api.openai.com/v1/audio/transcriptions',
+            headers={'Authorization': f'Bearer {api_key}'},
+            files={'file': (audio.filename or 'voice.webm', audio.stream, audio.mimetype or 'audio/webm')},
+            data={'model': os.environ.get('OPENAI_TRANSCRIPTION_MODEL', 'whisper-1'), 'response_format': 'json'},
+            timeout=90
+        )
+        if not response.ok:
+            app.logger.error('Voice transcription provider failed: %s', response.text[:500])
+            return jsonify({'error': 'Voice transcription service failed. Please try again.'}), 502
+        transcript = response.json().get('text', '').strip()
+        if not transcript:
+            return jsonify({'error': 'No speech was detected in the recording.'}), 422
+        return jsonify({'text': transcript})
+    except requests.RequestException:
+        app.logger.exception('Voice transcription request failed')
+        return jsonify({'error': 'Voice transcription service is unavailable.'}), 502
 
 @app.route('/api/suggestions', methods=['GET'])
 def get_suggestions():
