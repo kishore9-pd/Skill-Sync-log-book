@@ -1,4 +1,4 @@
-const CACHE_NAME = 'techwing-logbook-v3';
+const CACHE_NAME = 'techwing-logbook-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/static/styles.css',

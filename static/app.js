@@ -908,10 +908,7 @@ function renderBlankPrintSheet() {
           </tr>
           <tr>
             <td class="lbl-cell">TRAINER</td>
-            <td class="val-cell" style="width: 35%; color: #999;">____________________</td>
-            <td class="val-cell" colspan="2" style="text-align: center; color: #555555; font-size: 11px;">
-              [ Trainer Approval & Signature ]
-            </td>
+            <td class="val-cell" colspan="3">____________________</td>
           </tr>
         </table>
 
@@ -980,10 +977,7 @@ function loadLogToPrintSheet(logId) {
           </tr>
           <tr>
             <td class="lbl-cell">TRAINER</td>
-            <td class="val-cell" style="width: 35%;">${log.trainer || ''}</td>
-            <td class="val-cell" colspan="2" style="text-align: center; color: #555555; font-size: 11px;">
-              [ Trainer Approval & Signature ]
-            </td>
+            <td class="val-cell" colspan="3">${escapeHtml(log.trainer || '')}</td>
           </tr>
         </table>
 
