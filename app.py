@@ -176,7 +176,13 @@ def index(combo_key=None):
 
 @app.route('/health')
 def health_check():
-    return jsonify({'status': 'ok'}), 200
+    try:
+        with db.engine.connect() as connection:
+            connection.execute(text('SELECT 1'))
+        return jsonify({'status': 'ok', 'database': 'connected'}), 200
+    except Exception:
+        app.logger.exception('Health check database connection failed')
+        return jsonify({'status': 'error', 'database': 'unavailable'}), 503
 
 @app.route('/api/config', methods=['GET'])
 def get_config():

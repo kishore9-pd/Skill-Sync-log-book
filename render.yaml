@@ -17,7 +17,7 @@ services:
         value: "penugondakishore2006@gmail.com"
       - key: DATABASE_URL
         fromDatabase:
-          name: techwing-daily-log-db
+          name: postgresql
           property: connectionString
       - key: OPENAI_API_KEY
         sync: false
@@ -25,5 +25,5 @@ services:
         value: whisper-1
 
 databases:
-  - name: techwing-daily-log-db
+  - name: postgresql
     plan: free
