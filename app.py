@@ -174,6 +174,10 @@ with app.app_context():
 def index(combo_key=None):
     return render_template('index.html')
 
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
 @app.route('/api/config', methods=['GET'])
 def get_config():
     return jsonify(COMBO_CONFIGS)
