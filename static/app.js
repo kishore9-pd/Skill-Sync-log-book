@@ -41,6 +41,7 @@ function handleInitialUrlRouting() {
   const hash = window.location.hash.toLowerCase();
 
   if (path.startsWith('/tracks/')) {
+    if (!restoreSavedUser()) return;
     const comboKey = path.replace('/tracks/', '').trim();
     if (comboKey) {
       appState.activeCombo = comboKey;
@@ -62,36 +63,42 @@ function handleInitialUrlRouting() {
   }
 
   if (path === '/dashboard' || hash === '#dashboard') {
+    if (!restoreSavedUser()) return;
     enterMainApp();
     switchAppTab('dashboard', null, false);
     return;
   }
 
   if (path === '/editor' || hash === '#editor') {
+    if (!restoreSavedUser()) return;
     enterMainApp();
     switchAppTab('editor', null, false);
     return;
   }
 
   if (path === '/voice-ai' || hash === '#voice-ai') {
+    if (!restoreSavedUser()) return;
     enterMainApp();
     switchAppTab('voice-ai', null, false);
     return;
   }
 
   if (path === '/history' || hash === '#history') {
+    if (!restoreSavedUser()) return;
     enterMainApp();
     switchAppTab('history', null, false);
     return;
   }
 
   if (path === '/print-sheet' || hash === '#print-sheet') {
+    if (!restoreSavedUser()) return;
     enterMainApp();
     switchAppTab('print-sheet', null, false);
     return;
   }
 
   if (path === '/suggestions' || hash === '#suggestions') {
+    if (!restoreSavedUser()) return;
     enterMainApp();
     switchAppTab('suggestions', null, false);
     return;
@@ -101,18 +108,25 @@ function handleInitialUrlRouting() {
 }
 
 function checkSavedUserSession() {
+  if (restoreSavedUser()) enterMainApp();
+  else showScreen('landing', false);
+}
+
+function restoreSavedUser() {
   const savedUser = localStorage.getItem('techwing_active_user');
-  if (savedUser) {
-    try {
-      appState.currentUser = JSON.parse(savedUser);
-      appState.activeCombo = appState.currentUser.combo || 'genai-aws';
-      enterMainApp();
-      return;
-    } catch (e) {
-      console.error(e);
-    }
+  if (!savedUser) {
+    showScreen('auth-login', false);
+    return false;
   }
-  showScreen('landing', false);
+  try {
+    appState.currentUser = JSON.parse(savedUser);
+    appState.activeCombo = appState.currentUser.combo || 'AWS+DEVOPS';
+    return Boolean(appState.currentUser.email);
+  } catch (error) {
+    localStorage.removeItem('techwing_active_user');
+    showScreen('auth-login', false);
+    return false;
+  }
 }
 
 // Navigation between SPA Screens with URL PushState
@@ -165,11 +179,7 @@ async function handleRegisterSubmit(e) {
     localStorage.setItem('techwing_active_user', JSON.stringify(data.user));
     enterMainApp();
   } catch (err) {
-    const user = { name, email, combo, pin };
-    appState.currentUser = user;
-    appState.activeCombo = combo;
-    localStorage.setItem('techwing_active_user', JSON.stringify(user));
-    enterMainApp();
+    alert('Server connection error. Registration was not completed. Please try again.');
   }
 }
 
@@ -488,13 +498,14 @@ async function saveCurrentLog() {
   const doubtsVal = document.getElementById('inputDoubts').value.trim();
   const importantNotesVal = document.getElementById('inputImportantNotes').value.trim();
 
-  if (!topicsVal) {
-    alert('Topics Covered Today is mandatory.');
-    return;
-  }
+  const missingFields = [
+    ['Date', dateVal], ['Day', dayVal], ['Lab / Room Location', labVal],
+    ['Check-In', checkInVal], ['Check-Out', checkOutVal], ['Trainer Name', trainerVal],
+    ['Topics Covered Today', topicsVal], ['Task / Assignment', assignmentVal]
+  ].filter(([, value]) => !value).map(([label]) => label);
 
-  if (!assignmentVal) {
-    alert('Task / Assignment is mandatory.');
+  if (missingFields.length) {
+    alert(`Please complete the required fields: ${missingFields.join(', ')}.`);
     return;
   }
 
@@ -985,19 +996,25 @@ function renderHistoryTable() {
   const tbody = document.getElementById('historyTableBody');
   if (!tbody) return;
 
-  if (appState.logs.length === 0) {
+  const query = (document.getElementById('historySearch')?.value || '').toLowerCase().trim();
+  const logs = appState.logs.filter(log => !query || [
+    log.date, log.day, log.combo, log.lab, log.trainer, log.topics,
+    log.practical, log.assignment, log.doubts, log.important_notes
+  ].some(value => String(value || '').toLowerCase().includes(query)));
+
+  if (logs.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No logs found.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = appState.logs.map((l, idx) => `
+  tbody.innerHTML = logs.map((l) => `
     <tr style="border-bottom: 1px solid var(--border-color);">
-      <td style="padding: 0.75rem;"><strong>${l.date}</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">(Form #${appState.logs.length - idx})</span></td>
-      <td style="padding: 0.75rem;">${l.day}</td>
-      <td style="padding: 0.75rem;"><span style="color: var(--accent-secondary); font-weight: 600;">${l.combo}</span></td>
-      <td style="padding: 0.75rem;">${l.lab || 'N/A'}</td>
-      <td style="padding: 0.75rem;">${l.trainer || 'N/A'}</td>
-      <td style="padding: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${(l.topics || '').split('\n')[0]}</td>
+      <td style="padding: 0.75rem;"><strong>${escapeHtml(l.date)}</strong><br><small>${escapeHtml(formatTime(l.checkIn) || '')} - ${escapeHtml(formatTime(l.checkOut) || '')}</small></td>
+      <td style="padding: 0.75rem;">${escapeHtml(l.day)}</td>
+      <td style="padding: 0.75rem;"><span style="color: var(--accent-secondary); font-weight: 600;">${escapeHtml(l.combo)}</span></td>
+      <td style="padding: 0.75rem;">${escapeHtml(l.lab || 'N/A')}</td>
+      <td style="padding: 0.75rem;">${escapeHtml(l.trainer || 'N/A')}</td>
+      <td style="padding: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((l.topics || '').split('\n')[0])}</td>
       <td style="padding: 0.75rem;">
         <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="loadLogToForm('${l.id}')">Open / Edit</button>
       </td>

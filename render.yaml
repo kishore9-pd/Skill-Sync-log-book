@@ -15,4 +15,10 @@ services:
       - key: ADMIN_EMAIL
         value: "penugondakishore2006@gmail.com"
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: techwing-daily-log-db
+          property: connectionString
+
+databases:
+  - name: techwing-daily-log-db
+    plan: free

@@ -208,21 +208,25 @@ def register_user():
     new_user.set_college_pin(pin)
     new_user.set_password(password)
 
-    db.session.add(new_user)
-    db.session.flush()
+    try:
+        db.session.add(new_user)
+        db.session.flush()
 
-    # Record Audit Log
-    audit = AuditLog(
-        user_id=new_user.id,
-        user_email=email,
-        action='REGISTER',
-        target_type='USER',
-        target_id=str(new_user.id),
-        metadata_json=json.dumps({'name': name, 'combo': combo, 'role': role}),
-        ip_address=request.remote_addr
-    )
-    db.session.add(audit)
-    db.session.commit()
+        audit = AuditLog(
+            user_id=new_user.id,
+            user_email=email,
+            action='REGISTER',
+            target_type='USER',
+            target_id=str(new_user.id),
+            metadata_json=json.dumps({'name': name, 'combo': combo, 'role': role}),
+            ip_address=request.remote_addr
+        )
+        db.session.add(audit)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        app.logger.exception('Student registration transaction failed for %s', email)
+        return jsonify({'error': 'Registration could not be saved. Please try again.'}), 500
 
     return jsonify({'message': 'Registration successful', 'user': new_user.to_dict()})
 
@@ -296,8 +300,19 @@ def save_log():
     topics = data.get('topics', '').strip()
     assignment = data.get('assignment', '').strip()
 
-    if not topics or not assignment:
-        return jsonify({'error': 'Topics Covered and Task / Assignment are required.'}), 400
+    required_fields = {
+        'date': data.get('date', '').strip(),
+        'day': data.get('day', '').strip(),
+        'lab': data.get('lab', '').strip(),
+        'check-in time': data.get('checkIn', '').strip(),
+        'check-out time': data.get('checkOut', '').strip(),
+        'trainer': data.get('trainer', '').strip(),
+        'topics covered': topics,
+        'task / assignment': assignment,
+    }
+    missing_fields = [label for label, value in required_fields.items() if not value]
+    if missing_fields:
+        return jsonify({'error': f"Please complete the required fields: {', '.join(missing_fields)}."}), 400
 
     owner_user = User.query.filter(User.email.ilike(user_email)).first()
     if not owner_user:
@@ -416,7 +431,32 @@ def ai_parse_voice():
     target_section = 'auto'
     target_name = "Dynamic AI Structurer"
 
-    if requested_target == 'topics':
+    section_patterns = {
+        'topics': r'(?:topics?|covered|learned)\s*(?:covered|today|with|are|:)?\s*',
+        'assignment': r'(?:task|assignment|homework)\s*(?:is|with|:)?\s*',
+        'doubts': r'(?:doubts?|questions?)\s*(?:are|with|:)?\s*',
+        'important_notes': r'(?:important\s+notes?|notes?)\s*(?:are|with|:)?\s*'
+    }
+
+    import re
+    labels = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in section_patterns.items())
+    matches = list(re.finditer(labels, text, flags=re.IGNORECASE))
+    if requested_target == 'auto' and len(matches) > 1:
+        parsed_values = {name: '' for name in section_patterns}
+        for index, match in enumerate(matches):
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+            value = text[match.end():end].strip(' ,.;:-')
+            parsed_values[match.lastgroup] = struct_to_bullets(value, {
+                'topics': '• Topic', 'assignment': '• Task',
+                'doubts': '• Doubt', 'important_notes': '• Note'
+            }[match.lastgroup])
+        parsed_topics = parsed_values['topics']
+        parsed_assignment = parsed_values['assignment']
+        parsed_doubts = parsed_values['doubts']
+        parsed_important_notes = parsed_values['important_notes']
+        target_section = 'multiple'
+        target_name = 'MULTIPLE FORM SECTIONS'
+    elif requested_target == 'topics':
         target_section = 'topics'
         target_name = "TOPICS COVERED TODAY"
         parsed_topics = struct_to_bullets(text, "• Topic")

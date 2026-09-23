@@ -293,43 +293,43 @@
                 <div class="form-row-2">
                   <div class="field-group">
                     <label><i class="fa-regular fa-calendar"></i> Date</label>
-                    <input type="date" id="inputDate" class="form-input" onchange="updateLivePaper()">
+                    <input type="date" id="inputDate" class="form-input" onchange="updateLivePaper()" required>
                   </div>
                   <div class="field-group">
                     <label><i class="fa-solid fa-calendar-day"></i> Day</label>
-                    <input type="text" id="inputDay" class="form-input" placeholder="e.g. Tuesday" oninput="updateLivePaper()">
+                    <input type="text" id="inputDay" class="form-input" placeholder="e.g. Tuesday" oninput="updateLivePaper()" required>
                   </div>
                 </div>
 
                 <div class="field-group">
                   <label><i class="fa-solid fa-laptop-code"></i> LAB / Room Location</label>
-                  <input type="text" id="inputLab" class="form-input" placeholder="e.g. Lab 04 - GenAI Hub" oninput="updateLivePaper()">
+                    <input type="text" id="inputLab" class="form-input" placeholder="e.g. Lab 04 - GenAI Hub" oninput="updateLivePaper()" required>
                 </div>
 
                 <div class="form-row-2">
                   <div class="field-group">
                     <label><i class="fa-solid fa-right-to-bracket"></i> Check-In</label>
-                    <input type="time" id="inputCheckIn" class="form-input" value="09:30" onchange="updateLivePaper()">
+                    <input type="time" id="inputCheckIn" class="form-input" value="09:30" onchange="updateLivePaper()" required>
                   </div>
                   <div class="field-group">
                     <label><i class="fa-solid fa-right-from-bracket"></i> Check-Out</label>
-                    <input type="time" id="inputCheckOut" class="form-input" value="16:30" onchange="updateLivePaper()">
+                    <input type="time" id="inputCheckOut" class="form-input" value="16:30" onchange="updateLivePaper()" required>
                   </div>
                 </div>
 
                 <div class="field-group">
                   <label><i class="fa-solid fa-chalkboard-user"></i> Trainer Name</label>
-                  <input type="text" id="inputTrainer" class="form-input" placeholder="Trainer Name" oninput="updateLivePaper()">
+                  <input type="text" id="inputTrainer" class="form-input" placeholder="Trainer Name" oninput="updateLivePaper()" required>
                 </div>
 
                 <div class="field-group">
                   <label><i class="fa-solid fa-square"></i> TOPICS COVERED TODAY</label>
-                  <textarea id="inputTopics" class="form-input" rows="4" oninput="updateLivePaper()"></textarea>
+                  <textarea id="inputTopics" class="form-input" rows="4" oninput="updateLivePaper()" required></textarea>
                 </div>
 
                 <div class="field-group">
                   <label><i class="fa-solid fa-square"></i> TASK / ASSIGNMENT</label>
-                  <textarea id="inputAssignment" class="form-input" rows="3" oninput="updateLivePaper()"></textarea>
+                  <textarea id="inputAssignment" class="form-input" rows="3" oninput="updateLivePaper()" required></textarea>
                 </div>
 
                 <div class="field-group">
@@ -531,6 +531,10 @@ For example, try saying:
             </div>
 
             <div class="editor-card">
+              <div class="field-group" style="margin-bottom: 1rem;">
+                <label for="historySearch"><i class="fa-solid fa-magnifying-glass"></i> Search Your Reports</label>
+                <input type="search" id="historySearch" class="form-input" placeholder="Search date, lab, trainer, combo, or report text" oninput="renderHistoryTable()">
+              </div>
               <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
                   <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem;">
