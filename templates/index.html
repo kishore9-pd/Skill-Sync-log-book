@@ -519,7 +519,7 @@ For example, try saying:
             <div class="pane-title-bar">
               <div>
                 <h2>Reports History & Exports</h2>
-                <p>Search, filter, and export past class report entries</p>
+                <p>Review and export past class report entries</p>
               </div>
               <div style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-outline" onclick="exportJSON()">Export JSON</button>
@@ -528,10 +528,6 @@ For example, try saying:
             </div>
 
             <div class="editor-card">
-              <div class="field-group" style="margin-bottom: 1rem;">
-                <label for="historySearch"><i class="fa-solid fa-magnifying-glass"></i> Search Your Reports</label>
-                <input type="search" id="historySearch" class="form-input" placeholder="Search date, lab, trainer, combo, or report text" oninput="renderHistoryTable()">
-              </div>
               <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
                   <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem;">

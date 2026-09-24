@@ -1061,11 +1061,7 @@ function renderHistoryTable() {
   const tbody = document.getElementById('historyTableBody');
   if (!tbody) return;
 
-  const query = (document.getElementById('historySearch')?.value || '').toLowerCase().trim();
-  const logs = appState.logs.filter(log => !query || [
-    log.date, log.day, log.combo, log.lab, log.trainer, log.topics,
-    log.practical, log.assignment, log.doubts, log.important_notes
-  ].some(value => String(value || '').toLowerCase().includes(query)));
+  const logs = appState.logs;
 
   if (logs.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No logs found.</td></tr>`;
