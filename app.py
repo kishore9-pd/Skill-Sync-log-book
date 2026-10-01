@@ -28,35 +28,57 @@ os.makedirs(app.instance_path, exist_ok=True)
 
 # Database Configuration
 db_url = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(app.instance_path, 'techwing_daily_log.db'))
-# Some hosted PostgreSQL services still provide the older postgres:// prefix.
+turso_token = os.environ.get('TURSO_AUTH_TOKEN') or os.environ.get('TURSO_TOKEN') or ''
+
+# Fallback: check if SECRET_KEY was set to Turso JWT token
+secret_val = os.environ.get('SECRET_KEY', '')
+if not turso_token and secret_val.startswith('eyJ'):
+    turso_token = secret_val
+
+is_turso = db_url.startswith(('libsql://', 'sqlite+libsql://', 'turso://')) or 'turso.io' in db_url
+
 if db_url.startswith('postgres://'):
     db_url = 'postgresql://' + db_url[len('postgres://'):]
 
-# Handle sqlite path normalization for windows
-if db_url.startswith('sqlite:///'):
-    raw_path = db_url.replace('sqlite:///', '')
-    if not os.path.isabs(raw_path):
-        raw_path = os.path.join(app.instance_path, raw_path)
-    db_url = 'sqlite:///' + raw_path.replace('\\', '/')
-
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_pre_ping': True,
-    'pool_recycle': 1800
-}
 
-if db_url.startswith(('postgresql://', 'postgresql+')):
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'].update({
-        'pool_size': int(os.environ.get('DB_POOL_SIZE', '20')),
-        'max_overflow': int(os.environ.get('DB_MAX_OVERFLOW', '40')),
-        'pool_timeout': 30
-    })
-elif db_url.startswith('sqlite:///'):
-    app.config['SQLALCHEMY_ENGINE_OPTIONS']['connect_args'] = {'timeout': 30}
+if is_turso:
+    import turso_dbapi
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'creator': lambda: turso_dbapi.connect(db_url, turso_token),
+        'pool_pre_ping': True,
+        'pool_recycle': 1800
+    }
+else:
+    if db_url.startswith('sqlite:///'):
+        raw_path = db_url.replace('sqlite:///', '')
+        if not os.path.isabs(raw_path):
+            raw_path = os.path.join(app.instance_path, raw_path)
+        db_url = 'sqlite:///' + raw_path.replace('\\', '/')
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 1800
+    }
+    if db_url.startswith(('postgresql://', 'postgresql+')):
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'].update({
+            'pool_size': int(os.environ.get('DB_POOL_SIZE', '20')),
+            'max_overflow': int(os.environ.get('DB_MAX_OVERFLOW', '40')),
+            'pool_timeout': 30
+        })
+    elif db_url.startswith('sqlite:///'):
+        app.config['SQLALCHEMY_ENGINE_OPTIONS']['connect_args'] = {'timeout': 30}
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+with app.app_context():
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Database schema auto-creation notice: {e}")
 
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'kishore@techwing.com').lower()
 
@@ -605,6 +627,7 @@ def save_suggestion():
         'suggestion': sug_entry.to_dict()
     })
 
+@app.route('/api/owner/master', methods=['GET'])
 def get_owner_master():
     passcode = request.args.get('passcode', '')
     email = request.args.get('email', '').lower()
@@ -702,6 +725,7 @@ def inspect_database():
         'recent_audits': [a.to_dict() for a in AuditLog.query.order_by(AuditLog.created_at.desc()).limit(10).all()]
     })
 
+@app.route('/api/owner/download-db', methods=['GET'])
 def download_database():
     passcode = request.args.get('passcode', '')
     email = request.args.get('email', '').lower()
